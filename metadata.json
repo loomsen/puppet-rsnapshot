@@ -1,0 +1,22 @@
+{
+  "name": "loomsen-rsnapshot",
+  "version": "0.1.0",
+  "author": "loomsen",
+  "summary": "Configures rsnapshot.",
+  "license": "Apache-2.0",
+  "source": "https://github.com/loomsen/puppet-rsnapshot",
+  "project_page": "https://github.com/loomsen/puppet-rsnapshot",
+  "issues_url": "https://github.com/loomsen/puppet-rsnapshot/issues",
+  "tags": [
+    "rsnapshot",
+    "backup",
+  ],
+  "requirements": [
+    { "name": "pe", "version_requirement": ">= 3.0.0" },
+    { "name": "puppet", "version_requirement": ">= 3.0.0" }
+  ],
+  "dependencies": [
+    { "name": "puppetlabs-stdlib","version_range": ">= 1.0.0"
+    }
+  ]
+}
