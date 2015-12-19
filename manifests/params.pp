@@ -7,6 +7,7 @@ class rsnapshot::params {
   $config_backup_user                   = 'root'
   $package_name                  = 'rsnapshot'
   $package_ensure                = 'present'
+  $config_backup_defaults        = true
   $config_version                = '1.2'
   $config_cmd_cp                 = '/bin/cp'
   $config_cmd_rm                 = '/bin/rm'
@@ -53,7 +54,7 @@ class rsnapshot::params {
   $config_sync_first             = false
   $config_rsync_numtries         = 1
   $config_use_lazy_deletes       = false
-  $config_backups                = {
+  $config_backup                = {
     '/etc'  => './',
     '/home' => './',
   }

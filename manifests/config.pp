@@ -15,11 +15,19 @@ class rsnapshot::config (
   file { $lockpath:
     ensure => 'directory',
   }
-  
+
+  notify {"Hosts is: $hosts ": }
   $hosts.each |String $host, Hash $hash | {
     $snapshot_root          = pick($hash['snapshot_root'], $rsnapshot::params::config_snapshot_root)
-    $backups                = pick($hash['backups'], $rsnapshot::params::config_backups)
+    $backup                = pick($hash['backup'], $rsnapshot::params::config_backup)
     $backup_user            = pick($hash['backup_user'], $rsnapshot::params::config_backup_user)
+    $backup_defaults        = pick($hash['backup_defaults'], $rsnapshot::params::config_backup_defaults)
+    if $backup_defaults {
+      $backups = merge($backup, $rsnapshot::params::config_backup) 
+    } else {
+      $backups = $backup   
+    }
+
     $cmd_cp                 = pick($hash['cmd_cp'], $rsnapshot::params::config_cmd_cp)
     $cmd_rm                 = pick($hash['cmd_rm'], $rsnapshot::params::config_cmd_rm)
     $cmd_rsync              = pick($hash['cmd_rsync'], $rsnapshot::params::config_cmd_rsync)
