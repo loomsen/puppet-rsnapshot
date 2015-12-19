@@ -2,7 +2,7 @@
 #
 # manage host configs
 class rsnapshot::config (
-  $hosts      = $rsnapshot::hosts,
+  $hosts          = $rsnapshot::hosts,
 ) {
   # these are global settings, no point in setting them per host
   $config_version         = $rsnapshot::params::config_version
@@ -25,7 +25,8 @@ class rsnapshot::config (
   $hosts_clean.each |String $host, Hash $hash | {
     $snapshot_root          = pick($hash['snapshot_root'], $rsnapshot::params::config_snapshot_root)
     $backup_user            = pick($hash['backup_user'], $rsnapshot::params::config_backup_user)
-    $backup                 = pick($hash['backup'], $rsnapshot::params::config_backup)
+    $default_backup_dirs    = pick($rsnapshot::default_backup, $rsnapshot::params::config_default_backup)
+    $backup                 = $hash['backup']
     $backup_defaults        = pick($hash['backup_defaults'], $rsnapshot::params::config_backup_defaults)
     $cmd_cp                 = pick($hash['cmd_cp'], $rsnapshot::params::config_cmd_cp)
     $cmd_rm                 = pick($hash['cmd_rm'], $rsnapshot::params::config_cmd_rm)
@@ -72,9 +73,14 @@ class rsnapshot::config (
     $lockfile               = "${lockpath}/${host}.pid"
     $logfile                = "${logpath}/${host}.log"
 
+    # fail if $backup_defaults is set to false and no $host[backup] defined
+    if ! $backup_defaults and ! $backup {
+      fail("There is no point in not specifying a backup, I got backup_defaults: ${backup_defaults} and backup definitions for this host (${host}) don't exist")
+    }
+
     # merge the backup hashes to one if backup_default is set (defaults to true)
     if $backup_defaults {
-      $backups = merge($backup, $rsnapshot::params::config_backup) 
+      $backups = merge($backup, $default_backup_dirs) 
     } else {
       $backups = $backup   
     }

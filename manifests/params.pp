@@ -54,7 +54,7 @@ class rsnapshot::params {
   $config_sync_first             = false
   $config_rsync_numtries         = 1
   $config_use_lazy_deletes       = false
-  $config_backup                = {
+  $config_default_backup         = {
     '/etc'  => './',
     '/home' => './',
   }

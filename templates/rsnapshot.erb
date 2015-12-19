@@ -128,7 +128,9 @@ linux_lvm_mountpath	<%= @linux_lvm_mountpath %>
 <% end -%>
 <% end -%>
 <% @backups.each_pair do |source, dest| -%>
-<% if @backup_user  != '' -%>
+<% if @host == 'localhost' -%>
+backup	<%= source %>	<%=dest%>
+<% elsif @backup_user  != '' -%>
 backup	<%= @backup_user %>@<%=@host%>:<%= source %>	<%=dest%>
 <% else -%>
 backup	<%=@host%>:<%= source %>	<%=dest%>
