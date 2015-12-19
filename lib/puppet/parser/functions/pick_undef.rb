@@ -1,6 +1,6 @@
 module Puppet::Parser::Functions
- newfunction(:pick_undef, :type => :rvalue, :doc => <<-EOS
-             This function is similar to pick_default, but will return or undefined values.
+newfunction(:pick_undef, :type => :rvalue, :doc => <<-EOS
+This function is similar to pick_default, but will return or undefined values.
 EOS
 ) do |args|
    fail "Must receive at least one argument." if args.empty?

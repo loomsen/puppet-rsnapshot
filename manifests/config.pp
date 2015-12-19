@@ -16,8 +16,21 @@ class rsnapshot::config (
     ensure => 'directory',
   }
 
+  #  $hosts_clean = $hosts.reduce( {} ) |$memo, $entry| {
+  #    $key   = $entry[0]
+  #    $value = $entry[1]
+  #    $new_value = $value ? {
+  #      undef   => {},
+  #      default => $value,
+  #    }
+  #    $memo + { $key => $new_value }
+  #  }
+  #  
+  $hosts_clean = assert_empty_hash($hosts)
   notify {"Hosts is: $hosts ": }
-  $hosts.each |String $host, Hash $hash | {
+  notify {"Hosts_clean is: $hosts_clean ": }
+
+  $hosts_clean.each |String $host, Hash $hash | {
     $snapshot_root          = pick($hash['snapshot_root'], $rsnapshot::params::config_snapshot_root)
     $backup                = pick($hash['backup'], $rsnapshot::params::config_backup)
     $backup_user            = pick($hash['backup_user'], $rsnapshot::params::config_backup_user)
@@ -27,7 +40,6 @@ class rsnapshot::config (
     } else {
       $backups = $backup   
     }
-
     $cmd_cp                 = pick($hash['cmd_cp'], $rsnapshot::params::config_cmd_cp)
     $cmd_rm                 = pick($hash['cmd_rm'], $rsnapshot::params::config_cmd_rm)
     $cmd_rsync              = pick($hash['cmd_rsync'], $rsnapshot::params::config_cmd_rsync)
