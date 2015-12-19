@@ -74,8 +74,8 @@ class rsnapshot::config (
     $logfile                = "${logpath}/${host}.log"
 
     # fail if $backup_defaults is set to false and no $host[backup] defined
-    if ! $backup_defaults and ! $backup {
-      fail("There is no point in not specifying a backup, I got backup_defaults: ${backup_defaults} and backup definitions for this host (${host}) don't exist")
+    if ! $backup_defaults and ! $backup  {
+      fail("==> Configuration error: backup_defaults is ${backup_defaults} and backup definitions for this host don't exist <==")
     }
 
     # merge the backup hashes to one if backup_default is set (defaults to true)
