@@ -16,6 +16,14 @@ class rsnapshot::config (
     ensure => 'directory',
   }
 
+  #$foo = ['1', '2', '3', '20..21']
+  #  $foo='*/5'
+  #$qax = rand_from_array($foo)
+  #notice("QAX is $qax ")
+
+
+
+
   # custom function, if only a hostname is given as a param, this is an empty hash
   # the next loop would break as puppet does not allow to reassign variables
   # the function checks $hosts for elements like: 
