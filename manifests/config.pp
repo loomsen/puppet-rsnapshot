@@ -16,7 +16,6 @@ class rsnapshot::config (
     ensure => 'directory',
   }
 
-  #$foo = ['1', '2', '3', '20..21']
   #  $foo='*/5'
   #$qax = rand_from_array($foo)
   #notice("QAX is $qax ")
@@ -34,6 +33,7 @@ class rsnapshot::config (
     $snapshot_root          = pick($hash['snapshot_root'], $rsnapshot::params::config_snapshot_root)
     $backup_user            = pick($hash['backup_user'], $rsnapshot::params::config_backup_user)
     $default_backup_dirs    = pick($rsnapshot::default_backup, $rsnapshot::params::config_default_backup)
+    $backup_levels          = pick($hash['backup_levels'], $rsnapshot::params::config_backup_levels, 'weekly')
     $backup                 = $hash['backup']
     $backup_defaults        = pick($hash['backup_defaults'], $rsnapshot::params::config_backup_defaults)
     $cmd_cp                 = pick($hash['cmd_cp'], $rsnapshot::params::config_cmd_cp)
@@ -113,6 +113,37 @@ class rsnapshot::config (
     }
     file { $config:
       content => template('rsnapshot/rsnapshot.erb')
+    }
+
+
+    ########################### CRON ####################################################
+    #30 1 * * *     /usr/bin/rsnapshot -c /etc/rsnapshot/cmweb1.rsnapshot.conf daily 
+    #15 1 * * 0     /usr/bin/rsnapshot -c /etc/rsnapshot/cmweb1.rsnapshot.conf weekly 
+    #    00 1 1 * *     /usr/bin/rsnapshot -c /etc/rsnapshot/cmweb1.rsnapshot.conf monthly
+    $cronfile = "/tmp/rsnapshot.d/cron/${host}"
+    $cron     = pick_default($hash['cron'], $rsnapshot::params::cron, 'absent')
+
+    concat { "${cronfile}":
+      #      replace => false,
+    }
+
+    $backup_levels.each |String $level| {
+    # allow to globally override ranges, create random numbers for backup_levels daily, weekly, monthly
+      $c_min      = pick($cron['minute'],   $rsnapshot::params::cron['minute'],   '*')
+      $c_hour     = pick($cron['hour'],   $rsnapshot::params::cron['hour'],   '*')
+      $c_monthday = pick($cron['monthday'],   $rsnapshot::params::cron['monthday'],   '*')
+      $c_month    = pick($cron['month'],   $rsnapshot::params::cron['month'],   '*')
+      $c_weekday  = pick($cron['weekday'],   $rsnapshot::params::cron['weekday'],   '*')
+
+      $minute     = rand_from_array($c_min, "${host}.${level}")
+      $hour       = rand_from_array($c_hour, "${host}.${level}")
+      $monthday   = rand_from_array($c_monthday, "${host}.${level}")
+      $month      = rand_from_array($c_month, "${host}.${level}")
+      $weekday    = rand_from_array($c_weekday, "${host}.${level}")
+      concat::fragment { "${host}.${level}":
+        target  => "${cronfile}",
+        content => template('rsnapshot/cron.erb'),
+      }
     }
   }
 }
