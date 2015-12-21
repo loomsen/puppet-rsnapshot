@@ -16,12 +16,6 @@ class rsnapshot::config (
     ensure => 'directory',
   }
 
-  #  $foo='*/5'
-  #$qax = rand_from_array($foo)
-  #notice("QAX is $qax ")
-
-
-
 
   # custom function, if only a hostname is given as a param, this is an empty hash
   # the next loop would break as puppet does not allow to reassign variables
@@ -121,20 +115,30 @@ class rsnapshot::config (
     #15 1 * * 0     /usr/bin/rsnapshot -c /etc/rsnapshot/cmweb1.rsnapshot.conf weekly 
     #    00 1 1 * *     /usr/bin/rsnapshot -c /etc/rsnapshot/cmweb1.rsnapshot.conf monthly
     $cronfile = "/tmp/rsnapshot.d/cron/${host}"
-    $cron     = pick_default($hash['cron'], $rsnapshot::params::cron, 'absent')
-
     concat { "${cronfile}":
       #      replace => false,
     }
+    #    $cron       = pick($hash['cron'], $rsnapshot::params::cron)
 
+
+    #    notify { "cron is ${cron} ": }
     $backup_levels.each |String $level| {
-    # allow to globally override ranges, create random numbers for backup_levels daily, weekly, monthly
-      $c_min      = pick($cron['minute'],   $rsnapshot::params::cron['minute'],   '*')
-      $c_hour     = pick($cron['hour'],   $rsnapshot::params::cron['hour'],   '*')
-      $c_monthday = pick($cron['monthday'],   $rsnapshot::params::cron['monthday'],   '*')
-      $c_month    = pick($cron['month'],   $rsnapshot::params::cron['month'],   '*')
-      $c_weekday  = pick($cron['weekday'],   $rsnapshot::params::cron['weekday'],   '*')
-
+      if validate_hash($hash) {
+      # allow to globally override ranges, create random numbers for backup_levels daily, weekly, monthly
+        if has_key($host, 'cron'){
+          $c_min      = pick($host['cron'][$level]['minute'],   $rsnapshot::params::cron[$level]['minute'],   '*')
+          $c_hour     = pick($host['cron'][$level]['hour'],     $rsnapshot::params::cron[$level]['hour'],   '*')
+          $c_monthday = pick($host['cron'][$level]['monthday'], $rsnapshot::params::cron[$level]['monthday'],   '*')
+          $c_month    = pick($host['cron'][$level]['month'],    $rsnapshot::params::cron[$level]['month'],   '*')
+          $c_weekday  = pick($host['cron'][$level]['weekday'],  $rsnapshot::params::cron[$level]['weekday'],   '*')
+        }
+      } else {
+        $c_min      = $rsnapshot::params::cron[$level]['minute']
+        $c_hour     = $rsnapshot::params::cron[$level]['hour']
+        $c_monthday = $rsnapshot::params::cron[$level]['monthday']
+        $c_month    = $rsnapshot::params::cron[$level]['month']
+        $c_weekday  = $rsnapshot::params::cron[$level]['weekday']
+      }
       $minute     = rand_from_array($c_min, "${host}.${level}")
       $hour       = rand_from_array($c_hour, "${host}.${level}")
       $monthday   = rand_from_array($c_monthday, "${host}.${level}")
