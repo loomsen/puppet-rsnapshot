@@ -87,9 +87,9 @@ class rsnapshot::config (
 
     # merge the backup hashes to one if backup_default is set (defaults to true)
     if $backup_defaults {
-      $backups = merge($backup, $default_backup_dirs) 
+      $backups = merge($backup, $default_backup_dirs)
     } else {
-      $backups = $backup   
+      $backups = $backup
     }
 
     # one of both interval or retain must be present
@@ -97,24 +97,24 @@ class rsnapshot::config (
       $interval             = pick($hash['interval'], $rsnapshot::params::config_interval)
     }
     # rsnapshot wants numeric values
-    if $link_dest { 
-      $link_dest_num        = bool2num($link_dest) 
+    if $link_dest {
+      $link_dest_num        = bool2num($link_dest)
     }
-    if $sync_first { 
-      $sync_first_num       = bool2num($sync_first)  
+    if $sync_first {
+      $sync_first_num       = bool2num($sync_first)
     }
-    if $use_lazy_deletes { 
-      $use_lazy_deletes_num = bool2num($use_lazy_deletes)   
+    if $use_lazy_deletes {
+      $use_lazy_deletes_num = bool2num($use_lazy_deletes)
     }
 
-    file { $exclude_file: 
+    file { $exclude_file:
       ensure => 'file',
     }
     file { $config:
       content => template('rsnapshot/rsnapshot.erb')
     }
     $cronfile = "${cron_dir}/${host}"
-    concat { "${cronfile}":
+    concat { $cronfile:
     }
     $backup_levels.each |String $level| {
       if validate_hash($hash) {
@@ -139,7 +139,7 @@ class rsnapshot::config (
       $month      = rand_from_array($c_month, "${host}.${level}")
       $weekday    = rand_from_array($c_weekday, "${host}.${level}")
       concat::fragment { "${host}.${level}":
-        target  => "${cronfile}",
+        target  => $cronfile,
         content => template('rsnapshot/cron.erb'),
       }
     }
