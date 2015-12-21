@@ -29,5 +29,4 @@ else
   gem 'puppet', :require => false
 end
 
-gem 'puppet', "3.8"
 # vim:ft=ruby
