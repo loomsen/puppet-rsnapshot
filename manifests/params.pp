@@ -7,6 +7,7 @@ class rsnapshot::params {
   $config_backup_user                   = 'root'
   $package_name                  = 'rsnapshot'
   $package_ensure                = 'present'
+  $cron_dir                      = '/tmp/rsnapshot.d/cron'
   $config_backup_levels          = [ 'daily', 'weekly', ]
   $config_backup_defaults        = true
   $config_version                = '1.2'

@@ -3,6 +3,7 @@
 # manage host configs
 class rsnapshot::config (
   $hosts          = $rsnapshot::hosts,
+  $cron_dir       = $rsnapshot::cron_dir,
 ) {
   # these are global settings, no point in setting them per host
   $config_version         = $rsnapshot::params::config_version
@@ -15,7 +16,9 @@ class rsnapshot::config (
   file { $lockpath:
     ensure => 'directory',
   }
-
+  file { $cron_dir:
+    ensure => 'directory',
+  }
   # custom function, if only a hostname is given as a param, this is an empty hash
   # the next loop would break as puppet does not allow to reassign variables
   # the function checks $hosts for elements like: 
