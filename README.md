@@ -261,3 +261,16 @@ Please read up on the following in the [rsnapshot manpage](http://linux.die.net/
 ####`$use_lazy_deletes`
 ####`$default_backup`
 ####`$backup_scripts`
+
+## Limitations
+Currently, this module support CentOS, Fedora (with the bloonix CentOS Repo), Ubuntu and Debian.
+
+## Development
+I have limited access to resources and time, so if you think this module is useful, like it, hate it, want to make it better or
+want it off the face of the planet, feel free to get in touch with me.
+
+## Editors
+Norbert Varzariu (loomsen)
+
+## Contributors
+Please see the [list of contributors.](https://github.com/loomsen/puppet-bloonix_agent/graphs/contributors)
