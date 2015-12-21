@@ -13,6 +13,9 @@ class rsnapshot (
   $package_name                  = $rsnapshot::params::package_name,
   $package_ensure                = $rsnapshot::params::package_ensure,
 ) inherits rsnapshot::params {
+  if $::puppetversion =~ /^(1|2|3)/ {
+    fail("This module requires Puppet 4")
+  }
   if $hosts {
     class { 'rsnapshot::install': }->
     class { 'rsnapshot::config': }
