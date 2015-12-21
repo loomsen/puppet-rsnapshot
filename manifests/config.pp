@@ -133,11 +133,11 @@ class rsnapshot::config (
         $c_month    = $rsnapshot::params::cron[$level]['month']
         $c_weekday  = $rsnapshot::params::cron[$level]['weekday']
       }
-      $minute     = rand_from_array($c_min, "${host}.${level}")
-      $hour       = rand_from_array($c_hour, "${host}.${level}")
-      $monthday   = rand_from_array($c_monthday, "${host}.${level}")
-      $month      = rand_from_array($c_month, "${host}.${level}")
-      $weekday    = rand_from_array($c_weekday, "${host}.${level}")
+      $minute     = rand_from_array($c_min, "${host}.${level}.minute")
+      $hour       = rand_from_array($c_hour, "${host}.${level}.hour")
+      $monthday   = rand_from_array($c_monthday, "${host}.${level}.monthday")
+      $month      = rand_from_array($c_month, "${host}.${level}.month")
+      $weekday    = rand_from_array($c_weekday, "${host}.${level}.weekday")
       concat::fragment { "${host}.${level}":
         target  => $cronfile,
         content => template('rsnapshot/cron.erb'),
