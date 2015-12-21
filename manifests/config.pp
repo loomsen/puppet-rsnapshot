@@ -9,6 +9,7 @@ class rsnapshot::config (
   $config_version         = $rsnapshot::params::config_version
   $lockpath               = pick($rsnapshot::lockpath, $rsnapshot::params::config_lockpath)
   $conf_d                 = pick($rsnapshot::conf_d, $rsnapshot::params::conf_d)
+  $snapshot_root          = pick($hosts['snapshot_root'], $rsnapshot::params::config_snapshot_root)
   # make sure lock path and conf path exist
   file { $conf_d:
     ensure => 'directory',
@@ -19,6 +20,9 @@ class rsnapshot::config (
   file { $cron_dir:
     ensure => 'directory',
   }
+  file { $snapshot_root:
+    ensure => 'directory',
+  }
   # custom function, if only a hostname is given as a param, this is an empty hash
   # the next loop would break as puppet does not allow to reassign variables
   # the function checks $hosts for elements like: 
@@ -26,7 +30,6 @@ class rsnapshot::config (
   $hosts_clean = assert_empty_hash($hosts)
 
   $hosts_clean.each |String $host, Hash $hash | {
-    $snapshot_root          = pick($hash['snapshot_root'], $rsnapshot::params::config_snapshot_root)
     $backup_user            = pick($hash['backup_user'], $rsnapshot::params::config_backup_user)
     $default_backup_dirs    = pick($rsnapshot::default_backup, $rsnapshot::params::config_default_backup)
     $backup_levels          = pick($hash['backup_levels'], $rsnapshot::params::config_backup_levels, 'weekly')
@@ -105,13 +108,12 @@ class rsnapshot::config (
     }
 
     file { $exclude_file: 
-      ensure => file,
+      ensure => 'file',
     }
     file { $config:
       content => template('rsnapshot/rsnapshot.erb')
     }
-
-    $cronfile = "/tmp/rsnapshot.d/cron/${host}"
+    $cronfile = "${cron_dir}/${host}"
     concat { "${cronfile}":
     }
     $backup_levels.each |String $level| {

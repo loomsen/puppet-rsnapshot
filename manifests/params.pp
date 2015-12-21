@@ -3,11 +3,11 @@
 # default params
 class rsnapshot::params {
   $hosts                         = undef
-  $conf_d                        = '/tmp/rsnapshot.d' # the place where the host specific configs are stored
-  $config_backup_user                   = 'root'
+  $conf_d                        = '/etc/rsnapshot' # the place where the host specific configs are stored
+  $config_backup_user            = 'root'
   $package_name                  = 'rsnapshot'
   $package_ensure                = 'present'
-  $cron_dir                      = '/tmp/rsnapshot.d/cron'
+  $cron_dir                      = '/etc/cron.d'
   $config_backup_levels          = [ 'daily', 'weekly', ]
   $config_backup_defaults        = true
   $config_version                = '1.2'

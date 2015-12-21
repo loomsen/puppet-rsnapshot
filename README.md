@@ -205,6 +205,7 @@ Boolean. Backup default backup dirs or not.
 ####`$cron`
 Hash. Set time ranges for different backup levels.
 Hash is of the form:
+```puppet
 cron =>{
   daily => {
     minute => param,
@@ -216,6 +217,26 @@ cron =>{
   }
   {...}
 }
+```
+####`$snapshot_root`
+global. the directory holding your backups. you will end up with a structure like:
+```
+/backup/
+├── example.com
+│   ├── daily.0
+│   ├── daily.1
+│   ├── daily.2
+│   ├── daily.3
+│   ├── weekly.0
+│   ├── weekly.1
+│   ├── weekly.2
+│   └── weekly.3
+└── localhost
+    ├── daily.0
+    ├── daily.1
+    ├── daily.2
+    └── weekly.0
+```
 ### rsnapshot configuration variables
 Please read up on the following in the [rsnapshot manpage](http://linux.die.net/man/1/rsnapshot)
 ####`$cmd_cp`
@@ -239,7 +260,6 @@ Please read up on the following in the [rsnapshot manpage](http://linux.die.net/
 ####`$logpath`
 ####`$logfile`
 ####`$lockpath`
-####`$snapshot_root`
 ####`$no_create_root`
 ####`$verbose`
 ####`$loglevel`
