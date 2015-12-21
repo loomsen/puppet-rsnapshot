@@ -62,33 +62,33 @@ class rsnapshot::params {
   }
   $config_backup_scripts         = {}
   $cron = {
-    'hourly'     => {
-      'minute'   => '0..59',
-      'hour'     => '*',      # you could also do:   ['21..23','0..4','5'],
-      'monthday' => '*',
-      'month'    => '*',
-      'weekday'  => '*',
+    hourly     => {
+      minute   => '0..59',
+      hour     => '*',      # you could also do:   ['21..23','0..4','5'],
+      monthday => '*',
+      month    => '*',
+      weekday  => '*',
     },
-    'daily'      => {
-      'minute'   => '0..59',
-      'hour'     => '0..23',      # you could also do:   ['21..23','0..4','5'],
-      'monthday' => '*',
-      'month'    => '*',
-      'weekday'  => '*',
+    daily      => {
+      minute   => '0..59',
+      hour     => '0..23',      # you could also do:   ['21..23','0..4','5'],
+      monthday => '*',
+      month    => '*',
+      weekday  => '*',
     },
-    'weekly'     => {
-      'minute'   => '0..59',
-      'hour'     => '0..23',      # you could also do:   ['21..23','0..4','5'],
-      'monthday' => '*',
-      'month'    => '*',
-      'weekday'  => '0..6',
+    weekly     => {
+      minute   => '0..59',
+      hour     => '0..23',      # you could also do:   ['21..23','0..4','5'],
+      monthday => '*',
+      month    => '*',
+      weekday  => '0..6',
     },
-    'monthly'    => {
-      'minute'   => '0..59',
-      'hour'     => '0..23',      # you could also do:   ['21..23','0..4','5'],
-      'monthday' => '0..28',
-      'month'    => '*',
-      'weekday'  => '*',
+    monthly    => {
+      minute   => '0..59',
+      hour     => '0..23',      # you could also do:   ['21..23','0..4','5'],
+      monthday => '0..28',
+      month    => '*',
+      weekday  => '*',
     },
   }
 }

@@ -1,1 +1,3 @@
 validate for puppet 3 => impossible, misses the .each function
+
+Fix Documentation

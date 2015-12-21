@@ -4,6 +4,8 @@ This function checks an input struct for undefined hashes in key => hash and ass
 EOS
 )do |args|
    fail "Must receive one argument." if args.empty?
+   return args if args.is_a?(String)
+   return args if args.is_a?(Integer)
    args.each do |arg|
      h = Hash.new
      arg.each_pair do |host, hash|

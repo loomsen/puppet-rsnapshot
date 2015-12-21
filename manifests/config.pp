@@ -117,23 +117,51 @@ class rsnapshot::config (
     concat { $cronfile:
     }
     $backup_levels.each |String $level| {
-      if validate_hash($hash) {
+
       # allow to globally override ranges, create random numbers for backup_levels daily, weekly, monthly
-        if has_key($host, 'cron'){
-          $c_min      = pick($host['cron'][$level]['minute'],   $rsnapshot::params::cron[$level]['minute'],   '*')
-          $c_hour     = pick($host['cron'][$level]['hour'],     $rsnapshot::params::cron[$level]['hour'],   '*')
-          $c_monthday = pick($host['cron'][$level]['monthday'], $rsnapshot::params::cron[$level]['monthday'],   '*')
-          $c_month    = pick($host['cron'][$level]['month'],    $rsnapshot::params::cron[$level]['month'],   '*')
-          $c_weekday  = pick($host['cron'][$level]['weekday'],  $rsnapshot::params::cron[$level]['weekday'],   '*')
-        }
+    if has_key($hash,cron){
+      if has_key($hash[cron], $level) {
+          $cron = $hash[cron][$level]
+          if has_key($cron, minute) {
+            $c_min                      = $cron[minute]
+          } else {
+            $c_min                      = $rsnapshot::params::cron[$level][minute]
+          }
+          if has_key($cron, hour) {
+            $c_hour                     = $cron[hour]
+          } else {
+            $c_hour                     = $rsnapshot::params::cron[$level][hour]
+          }
+          if has_key($cron, monthday) {
+            $c_monthday                 = $cron[monthday]
+          } else {
+            $c_monthday                 = $rsnapshot::params::cron[$level][monthday]
+          }
+          if has_key($cron, month) {
+            $c_month                    = $cron[month]
+          } else {
+            $c_month                    = $rsnapshot::params::cron[$level][month]
+          }
+          if has_key($cron, weekday)  {
+            $c_weekday                  = $cron[weekday]
+          } else {
+            $c_weekday                  = $rsnapshot::params::cron[$level][weekday]
+          }
       } else {
-        $c_min      = $rsnapshot::params::cron[$level]['minute']
-        $c_hour     = $rsnapshot::params::cron[$level]['hour']
-        $c_monthday = $rsnapshot::params::cron[$level]['monthday']
-        $c_month    = $rsnapshot::params::cron[$level]['month']
-        $c_weekday  = $rsnapshot::params::cron[$level]['weekday']
+          $c_min                        = $rsnapshot::params::cron[$level][minute]
+          $c_hour                       = $rsnapshot::params::cron[$level][hour]
+          $c_monthday                   = $rsnapshot::params::cron[$level][monthday]
+          $c_month                      = $rsnapshot::params::cron[$level][month]
+          $c_weekday                    = $rsnapshot::params::cron[$level][weekday]
       }
-      $minute     = rand_from_array($c_min, "${host}.${level}.minute")
+    } else {
+        $c_min                          = $rsnapshot::params::cron[$level][minute]
+        $c_hour                         = $rsnapshot::params::cron[$level][hour]
+        $c_monthday                     = $rsnapshot::params::cron[$level][monthday]
+        $c_month                        = $rsnapshot::params::cron[$level][month]
+        $c_weekday                      = $rsnapshot::params::cron[$level][weekday]
+    }
+      $minute                           = rand_from_array($c_min, "${host}.${level}.minute")
       $hour       = rand_from_array($c_hour, "${host}.${level}.hour")
       $monthday   = rand_from_array($c_monthday, "${host}.${level}.monthday")
       $month      = rand_from_array($c_month, "${host}.${level}.month")
