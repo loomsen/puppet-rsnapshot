@@ -237,6 +237,16 @@ global. the directory holding your backups. you will end up with a structure lik
     ├── daily.2
     └── weekly.0
 ```
+
+####`$default_backup`
+The default backup directories (may be set per host, even though there is not much sense in doing so)
+Default is:
+```puppet
+default_backup => {
+  '/etc'  => './',
+  '/home' => './',
+}
+```
 ### rsnapshot configuration variables
 Please read up on the following in the [rsnapshot manpage](http://linux.die.net/man/1/rsnapshot)
 ####`$cmd_cp`
@@ -279,7 +289,6 @@ Please read up on the following in the [rsnapshot manpage](http://linux.die.net/
 ####`$sync_first`
 ####`$rsync_numtries`
 ####`$use_lazy_deletes`
-####`$default_backup`
 ####`$backup_scripts`
 
 ## Limitations
