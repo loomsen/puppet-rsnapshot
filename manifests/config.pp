@@ -111,7 +111,7 @@ class rsnapshot::config (
       ensure => 'file',
     }
     file { $config:
-      content => template('rsnapshot/rsnapshot.erb')
+      content => template('rsnapshot/rsnapshot.erb'),
     }
     $cronfile = "${cron_dir}/${host}"
     concat { $cronfile:
