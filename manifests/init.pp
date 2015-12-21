@@ -10,14 +10,13 @@ class rsnapshot (
   $logpath                       = $rsnapshot::params::config_logpath,
   $lockpath                      = $rsnapshot::params::config_lockpath,
   $default_backup                = $rsnapshot::params::config_default_backup,
+  $package_name                  = $rsnapshot::params::package_name,
+  $package_ensure                = $rsnapshot::params::package_ensure,
 ) inherits rsnapshot::params {
-
-  #  anchor { 'rsnapshot::begin': } ->
-  #class { 'rsnapshot::install': } ->
-  #class { 'rsnapshot::config': } ->
-  #anchor { 'rsnapshot::end': }
   if $hosts {
+    class { 'rsnapshot::install': }->
     class { 'rsnapshot::config': }
+    contain 'rsnapshot::install'
     contain 'rsnapshot::config'
   }
 }

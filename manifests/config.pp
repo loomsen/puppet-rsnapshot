@@ -16,7 +16,6 @@ class rsnapshot::config (
     ensure => 'directory',
   }
 
-
   # custom function, if only a hostname is given as a param, this is an empty hash
   # the next loop would break as puppet does not allow to reassign variables
   # the function checks $hosts for elements like: 
@@ -109,19 +108,9 @@ class rsnapshot::config (
       content => template('rsnapshot/rsnapshot.erb')
     }
 
-
-    ########################### CRON ####################################################
-    #30 1 * * *     /usr/bin/rsnapshot -c /etc/rsnapshot/cmweb1.rsnapshot.conf daily 
-    #15 1 * * 0     /usr/bin/rsnapshot -c /etc/rsnapshot/cmweb1.rsnapshot.conf weekly 
-    #    00 1 1 * *     /usr/bin/rsnapshot -c /etc/rsnapshot/cmweb1.rsnapshot.conf monthly
     $cronfile = "/tmp/rsnapshot.d/cron/${host}"
     concat { "${cronfile}":
-      #      replace => false,
     }
-    #    $cron       = pick($hash['cron'], $rsnapshot::params::cron)
-
-
-    #    notify { "cron is ${cron} ": }
     $backup_levels.each |String $level| {
       if validate_hash($hash) {
       # allow to globally override ranges, create random numbers for backup_levels daily, weekly, monthly

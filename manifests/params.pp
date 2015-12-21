@@ -60,14 +60,6 @@ class rsnapshot::params {
     '/home' => './',
   }
   $config_backup_scripts         = {}
-
-  #  $cron                          = {
-  #    'minute'   => '0..59',
-  #    'hour'     => '0..23',      # you could also do:   ['21..23','0..4','5'],
-  #    'monthday' => '0..28',
-  #    'month'    => '1..12',
-  #    'weekday'  => '0..6',
-  #  }
   $cron = {
     'hourly'     => {
       'minute'   => '0..59',
