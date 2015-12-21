@@ -189,7 +189,7 @@ The following parameters are available in the `::rsnapshot` class:
 Hash containing the hosts to be backed up and optional overrides per host
 ####`$conf_d`
 The place where the configs will be dropped (Default: /etc/rsnapshot (will be created if it doesn't exist))
-####`$config_backup_user`
+####`$backup_user`
 The user to run the backup scripts as (Default: root, also the user used for ssh connections, if you change this make sure you have proper key deployed and the user exists in the nodes to be backed up.)
 ####`$package_name`
 Default: rsnapshot
