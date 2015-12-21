@@ -10,7 +10,7 @@
   "tags": [
     "rsnapshot",
     "backup",
-    "rsync",
+    "rsync"
   ],
   "requirements": [
     { "name": "pe", "version_requirement": ">= 3.0.0" },
@@ -36,6 +36,6 @@
     {
     "operatingsystem": "Fedora",
     "operatingsystemrelease": [ "17", "18", "19", "20", "21", "22", "23", "24" ]
-    },
+    }
   ]
 }
