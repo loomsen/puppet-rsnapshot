@@ -304,56 +304,6 @@ Default is:
   }
 ```
 
-####`$cron`
-Hash. Set time ranges for different backup levels.
-Hash is of the form:
-```puppet
-cron =>{
-  daily => {
-    minute => param,
-    hour => param,
-  }
-  weekly => {
-    minute => param,
-    hour => param,
-  }
-  {...}
-}
-```
-(Default:
-```puppet
-  $cron = {
-    hourly     => {
-      minute   => '0..59',
-      hour     => '*',
-      monthday => '*',
-      month    => '*',
-      weekday  => '*',
-    },
-    daily      => {
-      minute   => '0..59',
-      hour     => '0..23',
-      monthday => '*',
-      month    => '*',
-      weekday  => '*',
-    },
-    weekly     => {
-      minute   => '0..59',
-      hour     => '0..23',
-      monthday => '*',
-      month    => '*',
-      weekday  => '0..6',
-    },
-    monthly    => {
-      minute   => '0..59',
-      hour     => '0..23',
-      monthday => '0..28',
-      month    => '*',
-      weekday  => '*',
-    },
-  }
-```
-
 ####`$snapshot_root`
 global. the directory holding your backups.
 (Default: /backup)
