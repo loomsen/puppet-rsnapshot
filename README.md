@@ -187,21 +187,27 @@ The following parameters are available in the `::rsnapshot` class:
 
 ####`$hosts`
 Hash containing the hosts to be backed up and optional overrides per host
+(Default: undef (do nothing when no host given))
 ####`$conf_d`
-The place where the configs will be dropped (Default: /etc/rsnapshot (will be created if it doesn't exist))
+The place where the configs will be dropped 
+(Default: /etc/rsnapshot (will be created if it doesn't exist))
 ####`$backup_user`
-The user to run the backup scripts as (Default: root, also the user used for ssh connections, if you change this make sure you have proper key deployed and the user exists in the nodes to be backed up.)
+The user to run the backup scripts as 
+(Default: root, also the user used for ssh connections, if you change this make sure you have proper key deployed and the user exists in the nodes to be backed up.)
 ####`$package_name`
-Default: rsnapshot
+(Default: rsnapshot)
 ####`$package_ensure`
-Default: present
+(Default: present)
 ####`$cron_dir`
-Directory to drop the cron files to. Crons will be created per host. (Default: /etc/cron.d)
+Directory to drop the cron files to. Crons will be created per host. 
+(Default: /etc/cron.d)
 ####`$backup_levels`
 Array containing the backup levels (hourly, daily, weekly, monthly)
 Configure the backup_levels (valid per host and global, so you may either set: rsnapshot::backup_levels for all hosts or override default backup_levels for specific hosts)
+(Default: [ 'daily', 'weekly', ] )
 ####`$backup_defaults`
 Boolean. Backup default backup dirs or not.
+(Default: true)
 ####`$cron`
 Hash. Set time ranges for different backup levels.
 Hash is of the form:
@@ -218,8 +224,44 @@ cron =>{
   {...}
 }
 ```
+(Default:
+```puppet
+  $cron = {
+    hourly     => {
+      minute   => '0..59',
+      hour     => '*',
+      monthday => '*',
+      month    => '*',
+      weekday  => '*',
+    },
+    daily      => {
+      minute   => '0..59',
+      hour     => '0..23',
+      monthday => '*',
+      month    => '*',
+      weekday  => '*',
+    },
+    weekly     => {
+      minute   => '0..59',
+      hour     => '0..23',
+      monthday => '*',
+      month    => '*',
+      weekday  => '0..6',
+    },
+    monthly    => {
+      minute   => '0..59',
+      hour     => '0..23',
+      monthday => '0..28',
+      month    => '*',
+      weekday  => '*',
+    },
+  }
+```
+
 ####`$snapshot_root`
-global. the directory holding your backups. you will end up with a structure like:
+global. the directory holding your backups.
+(Default: /backup)
+You will end up with a structure like:
 ```
 /backup/
 ├── example.com
@@ -250,49 +292,99 @@ default_backup => {
 ### rsnapshot configuration variables
 Please read up on the following in the [rsnapshot manpage](http://linux.die.net/man/1/rsnapshot)
 ####`$cmd_cp`
+(Default is: '/bin/cp')
 ####`$cmd_rm`
+(Default is: '/bin/rm')
 ####`$cmd_rsync`
+(Default is: '/usr/bin/rsync')
 ####`$cmd_ssh`
+(Default is: '/usr/bin/ssh')
 ####`$cmd_logger`
+(Default is: '/usr/bin/logger')
 ####`$cmd_du`
+(Default is: '/usr/bin/du')
 ####`$cmd_rsnapshot_diff`
+(Default is: '/usr/bin/rsnapshot-diff')
 ####`$cmd_preexec`
+(Default is: undef)
 ####`$cmd_postexec`
+(Default is: undef)
 ####`$use_lvm`
+(Default is: undef)
 ####`$linux_lvm_cmd_lvcreate`
+(Default is: undef)
 ####`$linux_lvm_cmd_lvremove`
+(Default is: undef)
 ####`$linux_lvm_cmd_mount`
+(Default is: undef)
 ####`$linux_lvm_cmd_umount`
+(Default is: undef)
 ####`$linux_lvm_snapshotsize`
+(Default is: undef)
 ####`$linux_lvm_snapshotname`
+(Default is: undef)
 ####`$linux_lvm_vgpath`
+(Default is: undef)
 ####`$linux_lvm_mountpath`
+(Default is: undef)
 ####`$logpath`
+(Default is: '/var/log/rsnapshot')
 ####`$logfile`
+This will be $logpath/$hostname.log
+(Default is: '/var/log/rsnapshot.log')
 ####`$lockpath`
+(Default is: '/var/run/rsnapshot')
 ####`$no_create_root`
+(Default is: undef)
 ####`$verbose`
+(Default is: '2')
 ####`$loglevel`
+(Default is: '4')
 ####`$stop_on_stale_lockfile`
+(Default is: undef)
 ####`$rsync_short_args`
+(Default is: '-az')
 ####`$rsync_long_args`
+(Default is: undef)
 ####`$ssh_args`
+(Default is: undef)
 ####`$du_args`
+(Default is: undef)
 ####`$one_fs`
+(Default is: undef)
 ####`$retain`
+(Default is: {} )
 ####`$interval`
+(Default is:
+```puppet
+$config_interval = {
+  'daily'   => '7',
+  'weekly'  => '4',
+  'monthly' => '6',
+}
+```
+)
 ####`$include`
+(Default is: [])
 ####`$exclude`
+(Default is: [])
 ####`$include_file`
+(Default is: undef)
 ####`$exclude_file`
+(Default is: undef)
 ####`$link_dest`
+(Default is: false)
 ####`$sync_first`
+(Default is: false)
 ####`$rsync_numtries`
+(Default is: 1)
 ####`$use_lazy_deletes`
+(Default is: false )
 ####`$backup_scripts`
+(Default is: {})
 
 ## Limitations
-Currently, this module support CentOS, Fedora (with the bloonix CentOS Repo), Ubuntu and Debian.
+Currently, this module support CentOS, Fedora, Ubuntu and Debian.
 
 ## Development
 I have limited access to resources and time, so if you think this module is useful, like it, hate it, want to make it better or
@@ -303,3 +395,4 @@ Norbert Varzariu (loomsen)
 
 ## Contributors
 Please see the [list of contributors.](https://github.com/loomsen/puppet-bloonix_agent/graphs/contributors)
+
