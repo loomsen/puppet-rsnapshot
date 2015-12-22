@@ -13,6 +13,10 @@
     * [Examples](#examples)
     * [More Options](#more-options)
 5. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
+    * [Classes](#classes)
+    * [Functions](#functions)
+    * [Parameters](parameters)
+    * [Rsnapshot Configuration Parameters](#rsnapshot-configuration-variables)
 5. [Limitations - OS compatibility, etc.](#limitations)
 6. [Development - Guide for contributing to the module](#development)
 7. [Editors](#editors)
@@ -208,6 +212,98 @@ Configure the backup_levels (valid per host and global, so you may either set: r
 ####`$backup_defaults`
 Boolean. Backup default backup dirs or not.
 (Default: true)
+
+####`$config_default_backup`
+The default backup directories. This will apply to all hosts unless you set [backup_defaults](#backup_defaults) = false
+Default is:
+```puppet
+  $config_default_backup         = {
+    '/etc'  => './',
+    '/home' => './',
+  }
+```
+
+####`$cron`
+Hash. Set time ranges for different backup levels. Each item (minute, hour...) allows for cron notation, an array to pick a random time from and a range to pick a random time from.
+The range notation is '$start..$end', so to pick a random hour from 8 pm to 2 am, you could set the hour of your desired backup level to 
+`[ '20..23','0..2' ]`
+Example:
+```puppet
+  $cron = {
+    hourly     => {
+      minute   => '0..59',
+      hour     => [ '20..23','0..2' ],
+    }
+  }
+```
+Or in hiera:
+- global override
+```yaml
+rsnapshot::cron:
+  daily:
+    minute: '20'
+  weekly:
+    minute: '20'
+```
+- per host override
+```yaml
+rsnapshot::hosts:
+  webserver:
+    daily:
+      hour: [ '20..23','0..2' ]
+    weekly:
+      hour: [ '20..23','0..2' ]
+```
+
+Hash is of the form:
+```puppet
+$cron =>{
+  daily => {
+    minute => param,
+    hour => param,
+  }
+  weekly => {
+    minute => param,
+    hour => param,
+  }
+  {...}
+}
+```
+
+Default is:
+```puppet
+  $cron = {
+    hourly     => {
+      minute   => '0..59',  # random from 0 to 59
+      hour     => '*',      # you could also do:   ['21..23','0..4','5'],
+      monthday => '*',
+      month    => '*',
+      weekday  => '*',
+    },
+    daily      => {
+      minute   => '0..10',      # random from 0 to 10
+      hour     => '0..23',      # you could also do:   ['21..23','0..4','5'],
+      monthday => '*',
+      month    => '*',
+      weekday  => '*',
+    },
+    weekly     => {
+      minute   => '0..59',
+      hour     => '0..23',      # you could also do:   ['21..23','0..4','5'],
+      monthday => '*',
+      month    => '*',
+      weekday  => '0..6',
+    },
+    monthly    => {
+      minute   => '0..59',
+      hour     => '0..23',      # you could also do:   ['21..23','0..4','5'],
+      monthday => '0..28',
+      month    => '*',
+      weekday  => '*',
+    },
+  }
+```
+
 ####`$cron`
 Hash. Set time ranges for different backup levels.
 Hash is of the form:
@@ -289,99 +385,150 @@ default_backup => {
   '/home' => './',
 }
 ```
+####`$interval`
+How many backups of each level to keep.
+Default is:
+```puppet
+  $interval               = {
+    'daily'   => '7',
+    'weekly'  => '4',
+    'monthly' => '6',
+  }
+```
+
 ### rsnapshot configuration variables
 Please read up on the following in the [rsnapshot manpage](http://linux.die.net/man/1/rsnapshot)
+
+####`$config_version`
+Default is:  '1.2'
+
 ####`$cmd_cp`
-(Default is: '/bin/cp')
+Default is:  '/bin/cp'
+
 ####`$cmd_rm`
-(Default is: '/bin/rm')
+Default is:  '/bin/rm'
+
 ####`$cmd_rsync`
-(Default is: '/usr/bin/rsync')
+Default is:  '/usr/bin/rsync'
+
 ####`$cmd_ssh`
-(Default is: '/usr/bin/ssh')
+Default is:  '/usr/bin/ssh'
+
 ####`$cmd_logger`
-(Default is: '/usr/bin/logger')
+Default is:  '/usr/bin/logger'
+
 ####`$cmd_du`
-(Default is: '/usr/bin/du')
+Default is:  '/usr/bin/du'
+
 ####`$cmd_rsnapshot_diff`
-(Default is: '/usr/bin/rsnapshot-diff')
+Default is:  '/usr/bin/rsnapshot-diff'
+
 ####`$cmd_preexec`
-(Default is: undef)
+Default is:  undef
+
 ####`$cmd_postexec`
-(Default is: undef)
+Default is:  undef
+
 ####`$use_lvm`
-(Default is: undef)
+Default is:  undef
+
 ####`$linux_lvm_cmd_lvcreate`
-(Default is: undef)
+Default is:  undef # '/sbin/lvcreate'
+
 ####`$linux_lvm_cmd_lvremove`
-(Default is: undef)
+Default is:  undef # '/sbin/lvremove'
+
 ####`$linux_lvm_cmd_mount`
-(Default is: undef)
+Default is:  undef # '/sbin/mount'
+
 ####`$linux_lvm_cmd_umount`
-(Default is: undef)
+Default is:  undef # '/sbin/umount'
+
 ####`$linux_lvm_snapshotsize`
-(Default is: undef)
+Default is:  undef # '100M'
+
 ####`$linux_lvm_snapshotname`
-(Default is: undef)
+Default is:  undef # 'rsnapshot'
+
 ####`$linux_lvm_vgpath`
-(Default is: undef)
+Default is:  undef # '/dev'
+
 ####`$linux_lvm_mountpath`
-(Default is: undef)
+Default is:  undef # '/mount/rsnapshot'
+
 ####`$logpath`
-(Default is: '/var/log/rsnapshot')
+Default is:  '/var/log/rsnapshot'
+
 ####`$logfile`
-This will be $logpath/$hostname.log
-(Default is: '/var/log/rsnapshot.log')
+unused, we are logging to $logpath/$host.log
+Default is:  '/var/log/rsnapshot.log'
+
 ####`$lockpath`
-(Default is: '/var/run/rsnapshot')
+Default is:  '/var/run/rsnapshot'
+
+####`$snapshot_root`
+Default is:  '/backup/'
+
 ####`$no_create_root`
-(Default is: undef)
+Boolean: true or false
+Default is:  undef
+
 ####`$verbose`
-(Default is: '2')
+Default is:  '2'
+
 ####`$loglevel`
-(Default is: '4')
+Default is:  '4'
+
 ####`$stop_on_stale_lockfile`
-(Default is: undef)
+Boolean: true or false
+Default is:  undef
+
 ####`$rsync_short_args`
-(Default is: '-az')
+Default is:  '-az'
+
 ####`$rsync_long_args`
-(Default is: undef)
+rsync defaults are: --delete --numeric-ids --relative --delete-excluded 
+Default is:  undef
+
 ####`$ssh_args`
-(Default is: undef)
+Default is:  undef
+
 ####`$du_args`
-(Default is: undef)
+Default is:  undef
+
 ####`$one_fs`
-(Default is: undef)
+Default is:  undef
+
 ####`$retain`
-(Default is: {} )
-####`$interval`
-(Default is:
-```puppet
-$config_interval = {
-  'daily'   => '7',
-  'weekly'  => '4',
-  'monthly' => '6',
-}
-```
-)
+Default is:  { }
+
 ####`$include`
-(Default is: [])
+Default is:  []
+
 ####`$exclude`
-(Default is: [])
+Default is:  []
+
 ####`$include_file`
-(Default is: undef)
+Default is:  undef
+
 ####`$exclude_file`
-(Default is: undef)
+Other than this might suggest, the default behavior is to create an exclude file per host.
+Default is:  undef
+
 ####`$link_dest`
-(Default is: false)
+Default is:  false
+
 ####`$sync_first`
-(Default is: false)
+Default is:  false
+
 ####`$rsync_numtries`
-(Default is: 1)
+Default is:  1
+
 ####`$use_lazy_deletes`
-(Default is: false )
+Default is:  false
+
 ####`$backup_scripts`
-(Default is: {})
+Default is:  {}
 
 ## Limitations
 Currently, this module support CentOS, Fedora, Ubuntu and Debian.

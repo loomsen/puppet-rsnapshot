@@ -10,6 +10,7 @@ class rsnapshot::config (
   $lockpath               = pick($rsnapshot::lockpath, $rsnapshot::params::config_lockpath)
   $conf_d                 = pick($rsnapshot::conf_d, $rsnapshot::params::conf_d)
   $snapshot_root          = pick($hosts['snapshot_root'], $rsnapshot::params::config_snapshot_root)
+  $default_cron           = assert_empty_hash($::rsnapshot::cron)
   # make sure lock path and conf path exist
   file { $conf_d:
     ensure => 'directory',
@@ -116,56 +117,59 @@ class rsnapshot::config (
     $cronfile = "${cron_dir}/${host}"
     concat { $cronfile:
     }
+
+    # create cron files for each backup level
     $backup_levels.each |String $level| {
 
       # allow to globally override ranges, create random numbers for backup_levels daily, weekly, monthly
-    if has_key($hash,cron){
-      if has_key($hash[cron], $level) {
-          $cron = $hash[cron][$level]
-          if has_key($cron, minute) {
-            $c_min                      = $cron[minute]
+      if has_key($hash,cron){
+        if has_key($hash[cron], $level) {
+            $cron = $hash[cron][$level]
           } else {
-            $c_min                      = $rsnapshot::params::cron[$level][minute]
-          }
-          if has_key($cron, hour) {
-            $c_hour                     = $cron[hour]
-          } else {
-            $c_hour                     = $rsnapshot::params::cron[$level][hour]
-          }
-          if has_key($cron, monthday) {
-            $c_monthday                 = $cron[monthday]
-          } else {
-            $c_monthday                 = $rsnapshot::params::cron[$level][monthday]
-          }
-          if has_key($cron, month) {
-            $c_month                    = $cron[month]
-          } else {
-            $c_month                    = $rsnapshot::params::cron[$level][month]
-          }
-          if has_key($cron, weekday)  {
-            $c_weekday                  = $cron[weekday]
-          } else {
-            $c_weekday                  = $rsnapshot::params::cron[$level][weekday]
-          }
+            if has_key($default_cron, $level) {
+              $cron = $default_cron[$level]
+            } else {
+              $cron = $rsnapshot::params::cron[$level]
+            }
+        }
       } else {
-          $c_min                        = $rsnapshot::params::cron[$level][minute]
-          $c_hour                       = $rsnapshot::params::cron[$level][hour]
-          $c_monthday                   = $rsnapshot::params::cron[$level][monthday]
-          $c_month                      = $rsnapshot::params::cron[$level][month]
-          $c_weekday                    = $rsnapshot::params::cron[$level][weekday]
+        if has_key($default_cron, $level) {
+          $cron = $default_cron[$level]
+        } else {
+          $cron = $rsnapshot::params::cron[$level]
+        }
       }
-    } else {
-        $c_min                          = $rsnapshot::params::cron[$level][minute]
-        $c_hour                         = $rsnapshot::params::cron[$level][hour]
-        $c_monthday                     = $rsnapshot::params::cron[$level][monthday]
-        $c_month                        = $rsnapshot::params::cron[$level][month]
-        $c_weekday                      = $rsnapshot::params::cron[$level][weekday]
-    }
+
+      if has_key($cron, minute) {
+        $c_min                      = $cron[minute]
+      } else {
+        $c_min                      = $rsnapshot::params::cron[$level][minute]
+      }
+      if has_key($cron, hour) {
+        $c_hour                     = $cron[hour]
+      } else {
+        $c_hour                     = $rsnapshot::params::cron[$level][hour]
+      }
+      if has_key($cron, monthday) {
+        $c_monthday                 = $cron[monthday]
+      } else {
+        $c_monthday                 = $rsnapshot::params::cron[$level][monthday]
+      }
+      if has_key($cron, month) {
+        $c_month                    = $cron[month]
+      } else {
+        $c_month                    = $rsnapshot::params::cron[$level][month]
+      }
+      if has_key($cron, weekday)  {
+        $c_weekday                  = $cron[weekday]
+      } else {
+        $c_weekday                  = $rsnapshot::params::cron[$level][weekday]
+      }
       $minute                           = rand_from_array($c_min, "${host}.${level}.minute")
-      $hour       = rand_from_array($c_hour, "${host}.${level}.hour")
-      $monthday   = rand_from_array($c_monthday, "${host}.${level}.monthday")
-      $month      = rand_from_array($c_month, "${host}.${level}.month")
-      $weekday    = rand_from_array($c_weekday, "${host}.${level}.weekday")
+      $hour                             = rand_from_array($c_hour, "${host}.${level}.hour")
+      $monthday                         = rand_from_array($c_monthday, "${host}.${level}.monthday")
+      $month                            = rand_from_array($c_month, "${host}.${level}.month")
+      $weekday                          = rand_from_array($c_weekday, "${host}.${level}.weekday")
       concat::fragment { "${host}.${level}":
         target  => $cronfile,
         content => template('rsnapshot/cron.erb'),
