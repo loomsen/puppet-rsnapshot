@@ -108,9 +108,20 @@ class rsnapshot::config (
       $use_lazy_deletes_num = bool2num($use_lazy_deletes)
     }
 
-    file { $exclude_file:
-      ensure => 'file',
+    if $include != '' {
+      file { $include_file:
+        ensure  => 'file',
+        content => template('rsnapshot/include.erb'),
+      }
     }
+
+    if $exclude != '' {
+      file { $exclude_file:
+        ensure  => 'file',
+        content => template('rsnapshot/exclude.erb'),
+      }
+    }
+
     file { $config:
       content => template('rsnapshot/rsnapshot.erb'),
     }

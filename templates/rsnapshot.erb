@@ -82,24 +82,18 @@ ssh_args	<%= @ssh_args %>
 <% if @du_args  != '' -%>
 du_args	<%= @du_args %>
 <% end -%>
-<% if @one_fs  != '' %>
+<% if @one_fs  != '' -%>
 one_fs	<%= @one_fs_num %>
 <% end -%>
-<% if @include != '' %>
-<% @include.each do |pattern| -%>
-include	<%= pattern %>
-<% end -%>
-<%end-%>
-<% if @exclude != '' %>
-<% @exclude.each do |pattern| -%>
-exclude	<%= pattern %>
-<% end -%>
-<%end-%>
+<% if @include != '' -%>
 <% if @include_file  != '' -%>
 include_file	<%= @include_file %>
 <% end -%>
+<% end -%>
+<% if @exclude != '' -%>
 <% if @exclude_file != '' -%>
 exclude_file	<%= @exclude_file %>
+<% end -%>
 <% end -%>
 <% if @link_dest  != '' -%>
 link_dest	<%= @link_dest_num %>
