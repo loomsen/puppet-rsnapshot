@@ -213,11 +213,11 @@ Configure the backup_levels (valid per host and global, so you may either set: r
 Boolean. Backup default backup dirs or not.
 (Default: true)
 
-####`$config_default_backup`
+####`$default_backup`
 The default backup directories. This will apply to all hosts unless you set [backup_defaults](#backup_defaults) = false
 Default is:
 ```puppet
-  $config_default_backup         = {
+  $default_backup         = {
     '/etc'  => './',
     '/home' => './',
   }
@@ -326,15 +326,6 @@ You will end up with a structure like:
     └── weekly.0
 ```
 
-####`$default_backup`
-The default backup directories (may be set per host, even though there is not much sense in doing so)
-Default is:
-```puppet
-default_backup => {
-  '/etc'  => './',
-  '/home' => './',
-}
-```
 ####`$interval`
 How many backups of each level to keep.
 Default is:
