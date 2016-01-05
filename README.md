@@ -66,6 +66,7 @@ Here are some more elaborate examples of what you can do with this module.
 ### Examples
 This will backup localhost with defaults. It will disable the default backup locations for example.com
 and just backup '/var' for example.com.
+
 ```puppet
 class { '::rsnapshot':
   hosts => {
@@ -79,7 +80,9 @@ class { '::rsnapshot':
   }
 }
 ```
+
 The same in hiera:
+
 ```yaml
 ---
 classes: rsnapshot
@@ -94,6 +97,7 @@ rsnapshot::hosts:
 
 
 A more complete hiera example:
+
 ```yaml
 ---
 classes: 
@@ -169,51 +173,51 @@ or maybe
 #### Public Classes
 * rsnapshot: Main class, includes all other classes.
 
-####Private Classes
+#### Private Classes
 
 * rsnapshot::install: Handles the packages.
 * rsnapshot::config: Handles configuration and cron files.
 * rsnapshot::params: default values.
 
 ### Functions
-####`assert_empty_hash`
+#### `assert_empty_hash`
 Sets an empty value to a hash (we need this so a loop doesn't break if just a hostname is given to pick up all defaults.
 
-####`pick_undef`
+#### `pick_undef`
 Like pick but returns undef values.
 
-####`rand_from_array`
+#### `rand_from_array`
 Takes an Integer, a String or an Array as input, and returns a random entry from the array (or just the String/Integer)
 
 ### Parameters
 
 The following parameters are available in the `::rsnapshot` class:
 
-####`$hosts`
+#### `$hosts`
 Hash containing the hosts to be backed up and optional overrides per host
 (Default: undef (do nothing when no host given))
-####`$conf_d`
+#### `$conf_d`
 The place where the configs will be dropped 
 (Default: /etc/rsnapshot (will be created if it doesn't exist))
-####`$backup_user`
+#### `$backup_user`
 The user to run the backup scripts as 
 (Default: root, also the user used for ssh connections, if you change this make sure you have proper key deployed and the user exists in the nodes to be backed up.)
-####`$package_name`
+#### `$package_name`
 (Default: rsnapshot)
-####`$package_ensure`
+#### `$package_ensure`
 (Default: present)
-####`$cron_dir`
+#### `$cron_dir`
 Directory to drop the cron files to. Crons will be created per host. 
 (Default: /etc/cron.d)
-####`$backup_levels`
+#### `$backup_levels`
 Array containing the backup levels (hourly, daily, weekly, monthly)
 Configure the backup_levels (valid per host and global, so you may either set: rsnapshot::backup_levels for all hosts or override default backup_levels for specific hosts)
 (Default: [ 'daily', 'weekly', ] )
-####`$backup_defaults`
+#### `$backup_defaults`
 Boolean. Backup default backup dirs or not.
 (Default: true)
 
-####`$default_backup`
+#### `$default_backup`
 The default backup directories. This will apply to all hosts unless you set [backup_defaults](#backup_defaults) = false
 Default is:
 ```puppet
@@ -223,7 +227,7 @@ Default is:
   }
 ```
 
-####`$cron`
+#### `$cron`
 Hash. Set time ranges for different backup levels. Each item (minute, hour...) allows for cron notation, an array to pick a random time from and a range to pick a random time from.
 The range notation is '$start..$end', so to pick a random hour from 8 pm to 2 am, you could set the hour of your desired backup level to 
 `[ '20..23','0..2' ]`
@@ -256,6 +260,7 @@ rsnapshot::hosts:
 ```
 
 Hash is of the form:
+
 ```puppet
 $cron =>{
   daily => {
@@ -271,6 +276,7 @@ $cron =>{
 ```
 
 Default is:
+
 ```puppet
   $cron = {
     hourly     => {
@@ -304,10 +310,11 @@ Default is:
   }
 ```
 
-####`$snapshot_root`
+#### `$snapshot_root`
 global. the directory holding your backups.
 (Default: /backup)
 You will end up with a structure like:
+
 ```
 /backup/
 ├── example.com
@@ -326,9 +333,10 @@ You will end up with a structure like:
     └── weekly.0
 ```
 
-####`$interval`
+#### `$interval`
 How many backups of each level to keep.
 Default is:
+
 ```puppet
   $interval               = {
     'daily'   => '7',
@@ -340,135 +348,135 @@ Default is:
 ### rsnapshot configuration variables
 Please read up on the following in the [rsnapshot manpage](http://linux.die.net/man/1/rsnapshot)
 
-####`$config_version`
+#### `$config_version`
 Default is:  '1.2'
 
-####`$cmd_cp`
+#### `$cmd_cp`
 Default is:  '/bin/cp'
 
-####`$cmd_rm`
+#### `$cmd_rm`
 Default is:  '/bin/rm'
 
-####`$cmd_rsync`
+#### `$cmd_rsync`
 Default is:  '/usr/bin/rsync'
 
-####`$cmd_ssh`
+#### `$cmd_ssh`
 Default is:  '/usr/bin/ssh'
 
-####`$cmd_logger`
+#### `$cmd_logger`
 Default is:  '/usr/bin/logger'
 
-####`$cmd_du`
+#### `$cmd_du`
 Default is:  '/usr/bin/du'
 
-####`$cmd_rsnapshot_diff`
+#### `$cmd_rsnapshot_diff`
 Default is:  '/usr/bin/rsnapshot-diff'
 
-####`$cmd_preexec`
+#### `$cmd_preexec`
 Default is:  undef
 
-####`$cmd_postexec`
+#### `$cmd_postexec`
 Default is:  undef
 
-####`$use_lvm`
+#### `$use_lvm`
 Default is:  undef
 
-####`$linux_lvm_cmd_lvcreate`
+#### `$linux_lvm_cmd_lvcreate`
 Default is:  undef # '/sbin/lvcreate'
 
-####`$linux_lvm_cmd_lvremove`
+#### `$linux_lvm_cmd_lvremove`
 Default is:  undef # '/sbin/lvremove'
 
-####`$linux_lvm_cmd_mount`
+#### `$linux_lvm_cmd_mount`
 Default is:  undef # '/sbin/mount'
 
-####`$linux_lvm_cmd_umount`
+#### `$linux_lvm_cmd_umount`
 Default is:  undef # '/sbin/umount'
 
-####`$linux_lvm_snapshotsize`
+#### `$linux_lvm_snapshotsize`
 Default is:  undef # '100M'
 
-####`$linux_lvm_snapshotname`
+#### `$linux_lvm_snapshotname`
 Default is:  undef # 'rsnapshot'
 
-####`$linux_lvm_vgpath`
+#### `$linux_lvm_vgpath`
 Default is:  undef # '/dev'
 
-####`$linux_lvm_mountpath`
+#### `$linux_lvm_mountpath`
 Default is:  undef # '/mount/rsnapshot'
 
-####`$logpath`
+#### `$logpath`
 Default is:  '/var/log/rsnapshot'
 
-####`$logfile`
+#### `$logfile`
 unused, we are logging to $logpath/$host.log
 Default is:  '/var/log/rsnapshot.log'
 
-####`$lockpath`
+#### `$lockpath`
 Default is:  '/var/run/rsnapshot'
 
-####`$snapshot_root`
+#### `$snapshot_root`
 Default is:  '/backup/'
 
-####`$no_create_root`
+#### `$no_create_root`
 Boolean: true or false
 Default is:  undef
 
-####`$verbose`
+#### `$verbose`
 Default is:  '2'
 
-####`$loglevel`
+#### `$loglevel`
 Default is:  '4'
 
-####`$stop_on_stale_lockfile`
+#### `$stop_on_stale_lockfile`
 Boolean: true or false
 Default is:  undef
 
-####`$rsync_short_args`
+#### `$rsync_short_args`
 Default is:  '-az'
 
-####`$rsync_long_args`
+#### `$rsync_long_args`
 rsync defaults are: --delete --numeric-ids --relative --delete-excluded 
 Default is:  undef
 
-####`$ssh_args`
+#### `$ssh_args`
 Default is:  undef
 
-####`$du_args`
+#### `$du_args`
 Default is:  undef
 
-####`$one_fs`
+#### `$one_fs`
 Default is:  undef
 
-####`$retain`
+#### `$retain`
 Default is:  { }
 
-####`$include`
+#### `$include`
 Default is:  []
 
-####`$exclude`
+#### `$exclude`
 Default is:  []
 
-####`$include_file`
+#### `$include_file`
 Default is:  undef
 
-####`$exclude_file`
+#### `$exclude_file`
 Other than this might suggest, the default behavior is to create an exclude file per host.
 Default is:  undef
 
-####`$link_dest`
+#### `$link_dest`
 Default is:  false
 
-####`$sync_first`
+#### `$sync_first`
 Default is:  false
 
-####`$rsync_numtries`
+#### `$rsync_numtries`
 Default is:  1
 
-####`$use_lazy_deletes`
+#### `$use_lazy_deletes`
 Default is:  false
 
-####`$backup_scripts`
+#### `$backup_scripts`
 Default is:  {}
 
 ## Limitations
