@@ -407,12 +407,15 @@ Default is:  undef # '/sbin/mount'
 Default is:  undef # '/sbin/umount'
 
 #### `$linux_lvm_snapshotsize`
+
 Default is:  undef # '100M'
 
 #### `$linux_lvm_snapshotname`
+
 Default is:  undef # 'rsnapshot'
 
 #### `$linux_lvm_vgpath`
+
 Default is:  undef # '/dev'
 
 #### `$linux_lvm_mountpath`
@@ -442,6 +445,7 @@ Default is:  '2'
 Default is:  '4'
 
 #### `$stop_on_stale_lockfile`
+
 Boolean: true or false
 Default is:  undef
 
@@ -471,6 +475,7 @@ Default is:  []
 Default is:  []
 
 #### `$include_file`
+
 Default is:  undef
 
 #### `$exclude_file`
@@ -484,6 +489,7 @@ Default is:  false
 Default is:  false
 
 #### `$rsync_numtries`
+
 Default is:  1
 
 #### `$use_lazy_deletes`
