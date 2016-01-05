@@ -412,14 +412,14 @@ Default is:  undef # '100M'
 
 #### `$linux_lvm_snapshotname`
 
-Default is:  undef # 'rsnapshot'
+Default is:  undef
 
 #### `$linux_lvm_vgpath`
 
-Default is:  undef # '/dev'
+Default is:  undef
 
 #### `$linux_lvm_mountpath`
-Default is:  undef # '/mount/rsnapshot'
+Default is:  undef
 
 #### `$logpath`
 Default is:  '/var/log/rsnapshot'
