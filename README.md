@@ -149,6 +149,7 @@ You may specify time ranges as follows:
   * default cron syntax (1-10, '*/5', 5)
   * an array with allowed values, for example, if you want the backup for a host to run between 1am and 5am, you would override the hours setting for the host in question.
 in hiera this would look like: (Explanation see below)
+
 ```yaml
 rsnapshot::hosts:
   example.com:
@@ -157,15 +158,20 @@ rsnapshot::hosts:
         'minute': '1'
         'hour':   '1..5'
 ```
+
 This will create the rsnapshot config using defaults from params.pp, but set the minute of the daily backup to '1' and the hour to something random between 1 and 5.
 So it would look something like:
+
 ```
 1 4 * * * foo daily
 ``` 
+
 or maybe
+
 ```
 1 2 * * * foo daily
 ```
+
 ## Reference
 
 ### Classes
@@ -220,6 +226,7 @@ Boolean. Backup default backup dirs or not.
 #### `$default_backup`
 The default backup directories. This will apply to all hosts unless you set [backup_defaults](#backup_defaults) = false
 Default is:
+
 ```puppet
   $default_backup         = {
     '/etc'  => './',
@@ -232,6 +239,7 @@ Hash. Set time ranges for different backup levels. Each item (minute, hour...) a
 The range notation is '$start..$end', so to pick a random hour from 8 pm to 2 am, you could set the hour of your desired backup level to 
 `[ '20..23','0..2' ]`
 Example:
+
 ```puppet
   $cron = {
     hourly     => {
@@ -240,8 +248,10 @@ Example:
     }
   }
 ```
+
 Or in hiera:
 - global override
+
 ```yaml
 rsnapshot::cron:
   daily:
@@ -249,7 +259,9 @@ rsnapshot::cron:
   weekly:
     minute: '20'
 ```
+
 - per host override
+
 ```yaml
 rsnapshot::hosts:
   webserver:
@@ -274,6 +286,7 @@ $cron =>{
   {...}
 }
 ```
+
 
 Default is:
 
