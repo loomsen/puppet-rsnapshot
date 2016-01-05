@@ -407,11 +407,9 @@ Default is:  undef # '/sbin/mount'
 Default is:  undef # '/sbin/umount'
 
 #### `$linux_lvm_snapshotsize`
-
 Default is:  undef # '100M'
 
 #### `$linux_lvm_snapshotname`
-
 Default is:  undef
 
 #### `$linux_lvm_vgpath`
