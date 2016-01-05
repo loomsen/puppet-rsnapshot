@@ -146,7 +146,7 @@ The defaults are pretty reasonable, I hope. However, you may override pretty muc
 #### Specials
 As mentioned, this module will generate random time entries for your hosts. The random number generator is hashed with hostname and backup_level, so the randomness will be repeatable per host.level. This is important so puppet won't override the crons with each run.
 You may specify time ranges as follows:
-  * default cron syntax (1-10, '*/5', 5)
+  * default cron syntax
   * an array with allowed values, for example, if you want the backup for a host to run between 1am and 5am, you would override the hours setting for the host in question.
 in hiera this would look like: (Explanation see below)
 
