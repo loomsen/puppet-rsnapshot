@@ -7,9 +7,9 @@ class rsnapshot::config (
 ) {
   # these are global settings, no point in setting them per host
   $config_version         = $rsnapshot::params::config_version
-  $lockpath               = pick($rsnapshot::lockpath, $rsnapshot::params::config_lockpath)
-  $conf_d                 = pick($rsnapshot::conf_d, $rsnapshot::params::conf_d)
-  $snapshot_root          = pick($hosts['snapshot_root'], $rsnapshot::params::config_snapshot_root)
+  $lockpath               = pick($rsnapshot::lockpath, $rsnapshot::params::config_lockpath, '/var/run/rsnapshot')
+  $conf_d                 = pick($rsnapshot::conf_d, $rsnapshot::params::conf_d, '/etc/rsnapshot')
+  $snapshot_root          = pick($hosts['snapshot_root'], $rsnapshot::params::config_snapshot_root, '/backup')
   $default_cron           = assert_empty_hash($::rsnapshot::cron)
   # make sure lock path and conf path exist
   file { $conf_d:
