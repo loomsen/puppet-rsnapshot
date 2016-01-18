@@ -1,7 +1,7 @@
 # == Class: rsnapshot::install
 #
 # Installs the rsnapshot package.
-class rsnapshot::install inherits rsnapshot {
+class rsnapshot::install {
   case $::operatingsystem {
     /^CentOS$/: { include epel }
     default: {}

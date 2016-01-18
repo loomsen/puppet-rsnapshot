@@ -14,7 +14,7 @@ class rsnapshot (
   $package_ensure                = $rsnapshot::params::package_ensure,
   $cron                          = $rsnapshot::params::cron,
 ) inherits rsnapshot::params {
-  if $::puppetversion =~ /^(1|2|3)/ {
+  if $puppetversion =~ /^(1|2|3)/ {
     fail('This module requires Puppet 4')
   }
   if $hosts {
