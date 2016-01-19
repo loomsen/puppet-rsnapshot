@@ -9,7 +9,7 @@ class rsnapshot::config (
   $config_version         = $rsnapshot::params::config_version
   $lockpath               = pick($rsnapshot::lockpath, $rsnapshot::params::config_lockpath, '/var/run/rsnapshot')
   $conf_d                 = pick($rsnapshot::conf_d, $rsnapshot::params::conf_d, '/etc/rsnapshot')
-  $snapshot_root          = pick($hosts['snapshot_root'], $rsnapshot::params::config_snapshot_root, '/backup')
+  $snapshot_root          = pick($hosts['snapshot_root'], $rsnapshot::snapshot_root, '/backup')
   $default_cron           = assert_empty_hash($::rsnapshot::cron)
   # make sure lock path and conf path exist
   file { $conf_d:
@@ -30,7 +30,7 @@ class rsnapshot::config (
   # { foo => } and converts those to { foo => {} }
   $hosts_clean = assert_empty_hash($hosts)
 
-  $hosts_clean.each |String $host, Hash $hash | {
+  $hosts_clean.each |String $host, $hash | {
     $backup_user            = pick($hash['backup_user'], $rsnapshot::params::config_backup_user)
     $default_backup_dirs    = pick($rsnapshot::default_backup, $rsnapshot::params::config_default_backup)
     $backup_levels          = pick($hash['backup_levels'], $rsnapshot::params::config_backup_levels, 'weekly')
@@ -74,7 +74,7 @@ class rsnapshot::config (
     $sync_first             = pick_undef($hash['sync_first'], $rsnapshot::params::config_sync_first)
     $use_lazy_deletes       = pick_undef($hash['use_lazy_deletes'], $rsnapshot::params::config_use_lazy_deletes)
     $rsync_numtries         = pick_undef($hash['rsync_numtries'], $rsnapshot::params::config_rsync_numtries)
-    $backup_scripts         = pick_undef($hash['backup_scripts'], $rsnapshot::params::config_backup_scripts)
+    #$backup_scripts         = pick_undef($hash['backup_scripts'], $rsnapshot::params::config_backup_scripts)
 
     $snapshot_dir           = "${config_snapshot_root}/${host}"
     $config                 = "${conf_d}/${host}.rsnapshot.conf"
@@ -114,21 +114,49 @@ class rsnapshot::config (
         content => template('rsnapshot/include.erb'),
       }
     }
-
+    
     if $exclude != '' {
       file { $exclude_file:
         ensure  => 'file',
         content => template('rsnapshot/exclude.erb'),
       }
     }
-
-    file { $config:
+    concat { $config:
+    }
+    concat::fragment { "${config} for ${host}":
+      target  => $config,
       content => template('rsnapshot/rsnapshot.erb'),
     }
+
+    if has_key($hash, backup_scripts) {
+
+      $hash[backup_scripts].each |$script, $credentials| {
+
+        if is_hash($credentials) {
+          $dbbackup_user     = $credentials['dbbackup_user']
+          $dbbackup_password = $credentials['dbbackup_password']
+        } else {
+          $dbbackup_user     = $rsnapshot::default_backup_scripts[$script]['dbbackup_user']
+          $dbbackup_password = $rsnapshot::default_backup_scripts[$script]['dbbackup_password']
+        }
+
+        concat::fragment { "${host}_${script}_backup":
+          target  => $config,
+          content => "backup_script	${conf_d}/${host}.${script}.sh	./${script}\n",
+        }
+
+        file { "${conf_d}/${host}.${script}.sh":
+          ensure  => present,
+          content => template("rsnapshot/${script}.sh.erb"),
+          mode    => '0755',
+        }
+        
+      }
+    }
+
     $cronfile = "${cron_dir}/${host}"
     concat { $cronfile:
     }
-
     # create cron files for each backup level
     $backup_levels.each |String $level| {
 
