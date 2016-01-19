@@ -1,5 +1,7 @@
 # rsnapshot
 
+## NOTE: ! Configuration for backup_scripts changed with version 0.4.0 (it was pretty useless in prior versions) !
+
 #### Table of Contents
 
 1. [Overview](#overview)
