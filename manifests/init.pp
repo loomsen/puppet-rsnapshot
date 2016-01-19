@@ -13,8 +13,12 @@ class rsnapshot (
   $package_name                  = $rsnapshot::params::package_name,
   $package_ensure                = $rsnapshot::params::package_ensure,
   $cron                          = $rsnapshot::params::cron,
+  $backup_scripts                = $rsnapshot::params::backup_scripts,
+  $exclude                       = $rsnapshot::params::config_exclude,
 ) inherits rsnapshot::params {
-  
+
+  $default_backup_scripts = $rsnapshot::params::backup_scripts + $backup_scripts
+  $default_exclude        = $rsnapshot::params::config_exclude + $exclude
   if $hosts {
     class { '::rsnapshot::install': }->
     class { '::rsnapshot::config': }

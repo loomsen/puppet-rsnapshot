@@ -130,9 +130,4 @@ backup	<%= @backup_user %>@<%=@host%>:<%= source %>	<%=dest%>
 backup	<%=@host%>:<%= source %>	<%=dest%>
 <% end -%>
 <% end -%>
-<% if @backup_scripts != '' -%>
-<% @backup_scripts.each_pair do |source, dest| -%>
-backup_script	<%= source %>	<%= dest %>
-<% end -%>
-<%end-%>
 

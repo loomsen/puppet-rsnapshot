@@ -91,4 +91,15 @@ class rsnapshot::params {
       weekday  => '*',
     },
   }
+  $backup_scripts = {
+    mysql             => {
+      dbbackup_user     => 'root',
+      dbbackup_password => 'myFancyPassWord',
+    },
+    psql                => {
+      dbbackup_user     => 'postgres',
+      dbbackup_password => '',
+    },
+    misc => {},
+  }
 }
