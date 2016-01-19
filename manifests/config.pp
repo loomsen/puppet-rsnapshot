@@ -9,7 +9,7 @@ class rsnapshot::config (
   $config_version         = $rsnapshot::params::config_version
   $lockpath               = pick($rsnapshot::lockpath, $rsnapshot::params::config_lockpath, '/var/run/rsnapshot')
   $conf_d                 = pick($rsnapshot::conf_d, $rsnapshot::params::conf_d, '/etc/rsnapshot')
-  $snapshot_root          = pick($hosts['snapshot_root'], $rsnapshot::params::config_snapshot_root, '/backup')
+  $snapshot_root          = pick($hosts['snapshot_root'], $rsnapshot::snapshot_root, '/backup')
   $default_cron           = assert_empty_hash($::rsnapshot::cron)
   # make sure lock path and conf path exist
   file { $conf_d:
@@ -121,46 +121,42 @@ class rsnapshot::config (
         content => template('rsnapshot/exclude.erb'),
       }
     }
-
-    file { $config:
+    concat { $config:
+    }
+    concat::fragment { "${config} for ${host}":
+      target  => $config,
       content => template('rsnapshot/rsnapshot.erb'),
     }
 
-      if has_key($hash, backup_scripts) {
+    if has_key($hash, backup_scripts) {
 
-        $hash[backup_scripts].each |$script, $credentials| {
-          if is_hash($credentials) {
-            $dbbackup_user     = $credentials['dbbackup_user']
-            $dbbackup_password = $credentials['dbbackup_password']
-          } else {
-            $dbbackup_user     = $rsnapshot::default_backup_scripts[$script]['dbbackup_user']
-            $dbbackup_password = $rsnapshot::default_backup_scripts[$script]['dbbackup_password']
-          }
-          #notify { "Script: $script ----- Credentials: $credentials ----- Host: $host": }
-           
+      $hash[backup_scripts].each |$script, $credentials| {
 
-          file_line { "${host}_${script}_backup":
-            ensure => present,
-            path   => $config,
-            line   => "backup_script	${conf_d}/${host}.${script}.sh	./${script}",
-          }
-          file { "${conf_d}/${host}.${script}.sh":
-            ensure  => present,
-            content => template("rsnapshot/${script}.sh.erb"),
-            mode    => '0755',
-          }
-          
+        if is_hash($credentials) {
+          $dbbackup_user     = $credentials['dbbackup_user']
+          $dbbackup_password = $credentials['dbbackup_password']
+        } else {
+          $dbbackup_user     = $rsnapshot::default_backup_scripts[$script]['dbbackup_user']
+          $dbbackup_password = $rsnapshot::default_backup_scripts[$script]['dbbackup_password']
         }
+
+        concat::fragment { "${host}_${script}_backup":
+          target  => $config,
+          content => "backup_script	${conf_d}/${host}.${script}.sh	./${script}\n",
+        }
+
+        file { "${conf_d}/${host}.${script}.sh":
+          ensure  => present,
+          content => template("rsnapshot/${script}.sh.erb"),
+          mode    => '0755',
+        }
+        
       }
-
-
-
-
+    }
 
     $cronfile = "${cron_dir}/${host}"
     concat { $cronfile:
     }
-
     # create cron files for each backup level
     $backup_levels.each |String $level| {
 

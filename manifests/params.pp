@@ -8,7 +8,7 @@ class rsnapshot::params {
   $package_name                  = 'rsnapshot'
   $package_ensure                = 'present'
   $cron_dir                      = '/etc/cron.d'
-  $config_backup_levels          = [ 'daily', 'weekly', ]
+  $config_backup_levels          = [ 'daily', 'weekly', 'monthly' ]
   $config_backup_defaults        = true
   $config_version                = '1.2'
   $config_cmd_cp                 = '/bin/cp'

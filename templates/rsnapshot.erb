@@ -1,8 +1,8 @@
 # This file is being managed by puppet
-# Module 'rsnaphost'
+# Module 'rsnapshot'
 
 config_version	<%= @config_version %>
-snapshot_root	<%= @snapshot_root %>
+snapshot_root	<%= @snapshot_root -%>/<%=@host%>
 <% if @no_create_root != '' -%> 
 no_create_root	<%= @no_create_root %>
 <% end -%>
@@ -130,4 +130,3 @@ backup	<%= @backup_user %>@<%=@host%>:<%= source %>	<%=dest%>
 backup	<%=@host%>:<%= source %>	<%=dest%>
 <% end -%>
 <% end -%>
-

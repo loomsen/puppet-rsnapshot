@@ -15,6 +15,7 @@ class rsnapshot (
   $cron                          = $rsnapshot::params::cron,
   $backup_scripts                = $rsnapshot::params::backup_scripts,
   $exclude                       = $rsnapshot::params::config_exclude,
+  $snapshot_root                 = $rsnapshot::params::config_snapshot_root,
 ) inherits rsnapshot::params {
 
   $default_backup_scripts = $rsnapshot::params::backup_scripts + $backup_scripts
