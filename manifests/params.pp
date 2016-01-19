@@ -8,7 +8,7 @@ class rsnapshot::params {
   $package_name                  = 'rsnapshot'
   $package_ensure                = 'present'
   $cron_dir                      = '/etc/cron.d'
-  $config_backup_levels          = [ 'daily', 'weekly', ]
+  $config_backup_levels          = [ 'daily', 'weekly', 'monthly' ]
   $config_backup_defaults        = true
   $config_version                = '1.2'
   $config_cmd_cp                 = '/bin/cp'
@@ -90,5 +90,16 @@ class rsnapshot::params {
       month    => '*',
       weekday  => '*',
     },
+  }
+  $backup_scripts = {
+    mysql             => {
+      dbbackup_user     => 'root',
+      dbbackup_password => 'myFancyPassWord',
+    },
+    psql                => {
+      dbbackup_user     => 'postgres',
+      dbbackup_password => '',
+    },
+    misc => {},
   }
 }
