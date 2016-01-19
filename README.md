@@ -358,6 +358,53 @@ Default is:
   }
 ```
 
+#### `$backup_scripts`
+Additional scripts to create, possible values are: mysql, psql, misc
+
+Default is:
+
+```puppet
+  $backup_scripts = {
+    mysql             => {
+      dbbackup_user     => 'root',
+      dbbackup_password => 'myFancyPassWord',
+    },
+    psql                => {
+      dbbackup_user     => 'postgres',
+      dbbackup_password => '',
+    },
+    misc => {},
+  }
+```
+
+Configuration example:
+
+```yaml
+rsnapshot::backup_scripts:
+  mysql:
+    dbbackup_user: 'dbbackup'
+    dbbackup_password: 'hunter2'
+  psql:
+    dbbackup_user: 'dbbackup'
+    dbbackup_password: 'yeshorsebatterystaple'
+
+rsnapshot::hosts:
+  foobar.com:
+    backup_scripts:
+      mysql:
+      psql:
+  bazqux:de:
+    backup_scripts:
+      mysql:
+        dbbackup_user: 'myuser'
+        dbbackup_password: 'mypassword'
+```
+
+This creates 
+- a mysql and a psql backup script for `foobar.com` using the credentials `dbbackup:hunter2` for mysql and `dbbackup:yeshorsebatterystaple` for psql
+- a mysql backup script for `bazqux.de` using the credentials `myuser:mypassword`
+
+
 ### rsnapshot configuration variables
 Please read up on the following in the [rsnapshot manpage](http://linux.die.net/man/1/rsnapshot)
 
@@ -492,9 +539,6 @@ Default is:  1
 
 #### `$use_lazy_deletes`
 Default is:  false
-
-#### `$backup_scripts`
-Default is:  {}
 
 ## Limitations
 Currently, this module support CentOS, Fedora, Ubuntu and Debian.
