@@ -67,8 +67,8 @@ class rsnapshot::config (
     $one_fs                 = pick_undef($hash['one_fs'], $rsnapshot::params::config_one_fs)
     $interval               = pick($hash['interval'], $rsnapshot::params::config_interval)
     $retain                 = pick_undef($hash['retain'], $rsnapshot::params::config_retain)
-    $include                = $hash['include']
-    $exclude                = $hash['exclude']
+    $include                = pick($hash['include'], [])
+    $exclude                = pick($hash['exclude'], [])
     $include_file           = pick($hash['include_file'], $rsnapshot::params::config_include_file, "${conf_d}/${host}.include")
     $exclude_file           = pick($hash['exclude_file'], $rsnapshot::params::config_exclude_file, "${conf_d}/${host}.exclude")
     $link_dest              = pick_undef($hash['link_dest'], $rsnapshot::params::config_link_dest)
@@ -110,7 +110,7 @@ class rsnapshot::config (
     }
 
     $real_include = $rsnapshot::include + $include
-    if $real_include != '' {
+    unless empty($real_include)  {
       file { $include_file:
         ensure  => 'file',
         content => template('rsnapshot/include.erb'),
@@ -118,7 +118,7 @@ class rsnapshot::config (
     }
 
     $real_exclude = $rsnapshot::exclude + $exclude 
-    if $real_exclude != '' {
+    unless empty($real_exclude) {
       file { $exclude_file:
         ensure  => 'file',
         content => template('rsnapshot/exclude.erb'),
