@@ -5,6 +5,7 @@ class rsnapshot::config (
   $hosts          = $rsnapshot::hosts,
   $cron_dir       = $rsnapshot::cron_dir,
 ) {
+
   # these are global settings, no point in setting them per host
   $config_version         = $rsnapshot::params::config_version
   $lockpath               = pick($rsnapshot::lockpath, $rsnapshot::params::config_lockpath, '/var/run/rsnapshot')
@@ -33,7 +34,7 @@ class rsnapshot::config (
   $hosts_clean.each |String $host, $hash | {
     $backup_user            = pick($hash['backup_user'], $rsnapshot::params::config_backup_user)
     $default_backup_dirs    = pick($rsnapshot::default_backup, $rsnapshot::params::config_default_backup)
-    $backup_levels          = pick($hash['backup_levels'], $rsnapshot::params::config_backup_levels, 'weekly')
+    $backup_levels          = pick($hash['backup_levels'], $rsnapshot::backup_levels, 'weekly')
     $backup                 = $hash['backup']
     $backup_defaults        = pick($hash['backup_defaults'], $rsnapshot::params::config_backup_defaults)
     $cmd_cp                 = pick($hash['cmd_cp'], $rsnapshot::params::config_cmd_cp)
@@ -66,9 +67,9 @@ class rsnapshot::config (
     $one_fs                 = pick_undef($hash['one_fs'], $rsnapshot::params::config_one_fs)
     $interval               = pick($hash['interval'], $rsnapshot::params::config_interval)
     $retain                 = pick_undef($hash['retain'], $rsnapshot::params::config_retain)
-    $include                = pick_undef($hash['include'], $rsnapshot::params::config_include)
-    $exclude                = pick_undef($hash['exclude'], $rsnapshot::params::config_exclude)
-    $include_file           = pick_undef($hash['include_file'], $rsnapshot::params::config_include_file)
+    $include                = pick($hash['include'], [])
+    $exclude                = pick($hash['exclude'], [])
+    $include_file           = pick($hash['include_file'], $rsnapshot::params::config_include_file, "${conf_d}/${host}.include")
     $exclude_file           = pick($hash['exclude_file'], $rsnapshot::params::config_exclude_file, "${conf_d}/${host}.exclude")
     $link_dest              = pick_undef($hash['link_dest'], $rsnapshot::params::config_link_dest)
     $sync_first             = pick_undef($hash['sync_first'], $rsnapshot::params::config_sync_first)
@@ -108,19 +109,22 @@ class rsnapshot::config (
       $use_lazy_deletes_num = bool2num($use_lazy_deletes)
     }
 
-    if $include != '' {
+    $real_include = $rsnapshot::include + $include
+    unless empty($real_include)  {
       file { $include_file:
         ensure  => 'file',
         content => template('rsnapshot/include.erb'),
       }
     }
-    
-    if $exclude != '' {
+
+    $real_exclude = $rsnapshot::exclude + $exclude 
+    unless empty($real_exclude) {
       file { $exclude_file:
         ensure  => 'file',
         content => template('rsnapshot/exclude.erb'),
       }
     }
+
     concat { $config:
     }
     concat::fragment { "${config} for ${host}":
