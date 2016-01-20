@@ -48,8 +48,8 @@ class rsnapshot::params {
     'weekly'  => '4',
     'monthly' => '6',
   }
-  $config_include                = []
-  $config_exclude                = []
+  $config_include                = [  ]
+  $config_exclude                = [  ]
   $config_include_file           = undef
   $config_exclude_file           = undef
   $config_link_dest              = false
