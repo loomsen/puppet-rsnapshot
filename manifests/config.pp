@@ -110,15 +110,11 @@ class rsnapshot::config (
     }
 
     $real_include = $rsnapshot::include + $include
-    notify { "$real_include for $host": }
-    if empty($real_include) {
-      notify { "$host $real_include is empty": }
-    } else  {
-      #      file { $include_file:
-      # ensure  => 'file',
-      #  content => template('rsnapshot/include.erb'),
-      #}
-      notify { "${host} $real_include is not empty": }
+    if $real_include != '' {
+      file { $include_file:
+        ensure  => 'file',
+        content => template('rsnapshot/include.erb'),
+      }
     }
 
     $real_exclude = $rsnapshot::exclude + $exclude 
