@@ -1,0 +1,17 @@
+#!/bin/bash
+# written by Norbert Varzariu <loomsen@gmail.com>
+# This Script is triggered by rsnapshot and dumps the specified dbs on the configured host.
+#
+host=<%=@host%>
+user=<%=@dbbackup_user%>
+pass=<%=@dbbackup_password%>
+
+PGPASSWORD="$pass"
+dbs=( $(psql -h "$host" -U "$user" -Atc "SELECT datname FROM pg_database WHERE NOT datistemplate AND datname <> 'postgres'")  )
+
+for db in "${dbs[@]}"; do
+  ssh -l root "$host" "pg_dump -U ${user} -Fc ${db}" > "$db".sql
+  wait
+  pbzip2 -p3 "$db".sql
+done
+

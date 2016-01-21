@@ -1,0 +1,10 @@
+#!/bin/bash
+# add custom stuff here 
+# FIXME: remember to concat for custom stuff after the last line of the puppet generated script
+<% if @osfamily == 'RedHat' -%>
+ssh <%=@host-%> rpm -qa --qf='%{name},' > packages.txt
+<%end-%>
+#
+#
+#
+# ++++++++++++++++++++++++++++++++++++++++++++
