@@ -12,6 +12,7 @@ class rsnapshot::config (
   $conf_d                 = pick($rsnapshot::conf_d, $rsnapshot::params::conf_d, '/etc/rsnapshot')
   $snapshot_root          = pick($hosts['snapshot_root'], $rsnapshot::snapshot_root, '/backup')
   $default_cron           = assert_empty_hash($::rsnapshot::cron)
+  $logpath                = pick($rsnapshot::logpath, $rsnapshot::params::config_logpath)
   # make sure lock path and conf path exist
   file { $conf_d:
     ensure => 'directory',
@@ -25,6 +26,10 @@ class rsnapshot::config (
   file { $snapshot_root:
     ensure => 'directory',
   }
+  file { $logpath:
+    ensure => directory,
+  }
+ 
   # custom function, if only a hostname is given as a param, this is an empty hash
   # the next loop would break as puppet does not allow to reassign variables
   # the function checks $hosts for elements like: 
@@ -56,7 +61,6 @@ class rsnapshot::config (
     $linux_lvm_vgpath       = pick_undef($hash['linux_lvm_vgpath'], $rsnapshot::params::config_linux_lvm_vgpath)
     $linux_lvm_mountpath    = pick_undef($hash['linux_lvm_mountpath'], $rsnapshot::params::config_linux_lvm_mountpath)
     $no_create_root         = pick_undef($hash['no_create_root'], $rsnapshot::params::config_no_create_root)
-    $logpath                = pick($hash['logpath'], $rsnapshot::logpath, $rsnapshot::params::config_logpath)
     $verbose                = pick($hash['verbose'], $rsnapshot::params::config_verbose)
     $loglevel               = pick($hash['loglevel'], $rsnapshot::params::config_loglevel)
     $stop_on_stale_lockfile = pick_undef($hash['stop_on_stale_lockfile'], $rsnapshot::params::config_stop_on_stale_lockfile)
@@ -117,7 +121,7 @@ class rsnapshot::config (
       }
     }
 
-    $real_exclude = $rsnapshot::exclude + $exclude 
+    $real_exclude = $rsnapshot::exclude + $exclude
     unless empty($real_exclude) {
       file { $exclude_file:
         ensure  => 'file',
