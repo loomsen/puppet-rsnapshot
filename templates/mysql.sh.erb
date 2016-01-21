@@ -1,0 +1,16 @@
+#!/bin/bash
+# written by Norbert Varzariu <loomsen@gmail.com>
+# This Script is triggered by rsnapshot and dumps the specified dbs on the configured host.
+#
+host=<%=@host%>
+user=<%=@dbbackup_user%>
+pass=<%=@dbbackup_password%>
+
+dbs=( $(mysql -h "$host" -u "$user" -p"$pass" -e 'show databases' | sed '1d;/information_schema/d;/performance_schema/d')  )
+
+for db in "${dbs[@]}"; do
+  mysqldump --host="$host" --user="$user" --password="$pass" --single-transaction --quick --routines --ignore-table=mysql.event "$db" > "$db".sql
+  wait
+  pbzip2 -p3 "$db".sql
+done
+
