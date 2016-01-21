@@ -85,12 +85,12 @@ du_args	<%= @du_args %>
 <% if @one_fs  != '' -%>
 one_fs	<%= @one_fs_num %>
 <% end -%>
-<% if @include != '' -%>
+<% if not @real_include.empty? -%>
 <% if @include_file  != '' -%>
 include_file	<%= @include_file %>
 <% end -%>
 <% end -%>
-<% if @exclude != '' -%>
+<% if not @real_exclude.empty? -%>
 <% if @exclude_file != '' -%>
 exclude_file	<%= @exclude_file %>
 <% end -%>
