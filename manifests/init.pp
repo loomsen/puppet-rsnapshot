@@ -18,15 +18,18 @@ class rsnapshot (
   $exclude                       = $rsnapshot::params::config_exclude,
   $snapshot_root                 = $rsnapshot::params::config_snapshot_root,
   $backup_levels                 = $rsnapshot::params::config_backup_levels,
+  $cron_service_name             = $rsnapshot::params::cron_service_name,
 ) inherits rsnapshot::params {
 
   $default_backup_scripts = $rsnapshot::params::backup_scripts + $backup_scripts
   $default_exclude        = $rsnapshot::params::config_exclude + $exclude
   if $hosts {
     class { '::rsnapshot::install': }->
-    class { '::rsnapshot::config': }
+    class { '::rsnapshot::config': }~>
+    class { '::rsnapshot::service': }
     contain '::rsnapshot::install'
     contain '::rsnapshot::config'
+    contain '::rsnapshot::service'
   }
 }
 
