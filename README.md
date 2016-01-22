@@ -379,13 +379,27 @@ Default is:
 
 #### `$backup_scripts`
 Additional scripts to create, possible values are: mysql, psql, misc
+
+mysql: used for mysql backups
+
+psql: used for postgresql backups
+
+misc: custom commands to run on the node
+
 You can set 
+
 `$dbbackup_user` :     backup user
+
 `$dbbackup_password` : password for the backup user
+
 `dumper` :             path to the dump bin you wish to use
+
 `dump_flags`:          flags for your dump bin
+
 `ignore_dbs` :         databases to be ignored
+
 `commands` :           array of commands to run on the host (this has no effect on psql and mysql scripts and is intended for your custom needs, see misc script section)
+
 See below for defaults
 
 NOTE: the psql and mysql scripts will SSH into your host and try and use $dumper.
@@ -719,4 +733,4 @@ Norbert Varzariu (loomsen)
 
 ## Contributors
 Please see the [list of contributors.](https://github.com/loomsen/puppet-bloonix_agent/graphs/contributors)
-
+A big thank you to Hendrik Horeis <hendrik.horeis@gmail.com> for all his input and testing of this module.
