@@ -12,6 +12,6 @@ dbs=( $(psql -h "$host" -U "$user" -Atc "SELECT datname FROM pg_database WHERE N
 for db in "${dbs[@]}"; do
   ssh -l root "$host" "pg_dump -U ${user} -Fc ${db}" > "$db".sql
   wait
-  pbzip2 -p3 "$db".sql
+  pbzip2 "$db".sql
 done
 

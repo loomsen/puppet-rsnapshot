@@ -365,6 +365,8 @@ Default is:
 
 #### `$backup_scripts`
 Additional scripts to create, possible values are: mysql, psql, misc
+NOTE: this requires you to install the client packages you wish to use.
+      You can do this by passing an array to [$rsnapshot::package_name](#package_name)
 
 Default is:
 
