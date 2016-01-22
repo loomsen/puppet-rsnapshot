@@ -36,7 +36,7 @@ class rsnapshot::config (
   $hosts_clean = assert_empty_hash($hosts)
 
   $hosts_clean.each |String $host, $hash | {
-    $backup_user            = pick($hash['backup_user'], $rsnapshot::params::config_backup_user)
+    $backup_user            = pick($hash['backup_user'], $rsnapshot::backup_user, $rsnapshot::params::config_backup_user, 'root')
     $default_backup_dirs    = pick($rsnapshot::default_backup, $rsnapshot::params::config_default_backup)
     $backup_levels          = pick($hash['backup_levels'], $rsnapshot::backup_levels, 'weekly')
     $backup                 = $hash['backup']

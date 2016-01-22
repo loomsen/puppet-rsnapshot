@@ -133,10 +133,14 @@ rsnapshot::hosts:
     backup:
       '/var': './var'
     cron:
-      'daily':
-        'minute': '0-10'
-        'hour':   '1..5'
-
+      mailto: 'bar1@example.com'
+      daily:
+        minute: '0-10'
+        hour:   '1..5'
+  db1:
+    backup_scripts:
+      mysql:
+      misc:
 
 ```
 
@@ -281,10 +285,18 @@ rsnapshot::hosts:
         hour: [ '20..23','0..2' ]
       weekly:
         hour: [ '20..23','0..2' ]
+  
   webhost:
+
+  customervm.provider.com:
+    backup_user: 'customer'
 ```
 
-Mails for webhost will go to admin@example.com (from the global override), those for webserver will go to support@example.com.
+`webhost`:  Mails will go to `admin@example.com` (from the global override).
+
+`webserver`: Mails will go to `support@example.com`.
+
+`customervm.provider.com`: The backup (and thus ssh) user will be `customer@customervm.provider.com`
 
 
 
@@ -380,11 +392,11 @@ Default is:
 #### `$backup_scripts`
 Additional scripts to create, possible values are: mysql, psql, misc
 
-mysql: used for mysql backups
+`mysql`: used for mysql backups
 
-psql: used for postgresql backups
+`psql`: used for postgresql backups
 
-misc: custom commands to run on the node
+`misc`: custom commands to run on the node
 
 You can set 
 
@@ -392,13 +404,13 @@ You can set
 
 `$dbbackup_password`: password for the backup user
 
-`$dumper`:             path to the dump bin you wish to use
+`$dumper`:            path to the dump bin you wish to use
 
-`$dump_flags`:          flags for your dump bin
+`$dump_flags`:        flags for your dump bin
 
-`$ignore_dbs`:         databases to be ignored (the psql script ignores template and postgres databases by default)
+`$ignore_dbs`:        databases to be ignored (the psql script ignores template and postgres databases by default)
 
-`$commands`:           array of commands to run on the host (this has no effect on psql and mysql scripts and is intended for your custom needs, see misc script section)
+`$commands`:          array of commands to run on the host (this has no effect on psql and mysql scripts and is intended for your custom needs, see misc script section)
 
 See below for defaults
 
@@ -436,6 +448,7 @@ Default is:
         ],
         default => [],
       },
+    }
   }
 
 ```
