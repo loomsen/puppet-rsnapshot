@@ -240,6 +240,9 @@ Default is:
 Hash. Set time ranges for different backup levels. Each item (minute, hour...) allows for cron notation, an array to pick a random time from and a range to pick a random time from.
 The range notation is '$start..$end', so to pick a random hour from 8 pm to 2 am, you could set the hour of your desired backup level to 
 `[ '20..23','0..2' ]`
+For the range feature to work, hours >0 and <10 must not have a preceding zero. 
+Wrong: `00.09`
+Correct: `0..9`
 Example:
 
 ```puppet
