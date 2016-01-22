@@ -6,10 +6,21 @@ host=<%=@host%>
 user=<%=@dbbackup_user%>
 pass=<%=@dbbackup_password%>
 
-dbs=( $(mysql -h "$host" -u "$user" -p"$pass" -e 'show databases' | sed '1d;/information_schema/d;/performance_schema/d')  )
-
+<% if (@dbbackup_user == 'root' && @dbbackup_password == '') -%>
+dbs=( 
+      $(ssh -l root "$host" "mysql -e 'show databases' | sed '1d;<%@ignore_dbs.to_a.each do |db|-%>/<%=db-%>/d;<%end-%>'" ) 
+    )
+<%else-%>
+dbs=( 
+      $(ssh -l root "$host" "mysql -u <%=@dbbackup_user-%> -p'<%=@dbbackup_password-%>' -e 'show databases' | sed '1d;<%@ignore_dbs.each do |db|-%>/<%=db-%>/d;<%end-%>'" )
+    )
+<%end-%>
 for db in "${dbs[@]}"; do
-  mysqldump --host="$host" --user="$user" --password="$pass" --single-transaction --quick --routines --ignore-table=mysql.event "$db" > "$db".sql
+<% if @dbbackup_user == 'root' -%>
+  ssh -l root "$host" "<%=@dumper-%> <%=@dump_flags-%> ${db}" > "$db".sql
+<%else-%>
+  ssh -l root "$host" "<%=@dumper-%>  --user=<%=@dbbackup_user-%> --password='<%=@dbbackup_password-%>' <%=@dump_flags-%> ${db}" > "$db".sql
+<%end-%>
   wait
   pbzip2 "$db".sql
 done

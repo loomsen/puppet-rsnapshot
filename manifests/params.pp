@@ -93,13 +93,19 @@ class rsnapshot::params {
     },
   }
   $backup_scripts = {
-    mysql             => {
+    mysql               => {
       dbbackup_user     => 'root',
-      dbbackup_password => 'myFancyPassWord',
+      dbbackup_password => '',
+      dumper            => 'mysqldump',
+      dump_flags        => '--single-transaction --quick --routines --ignore-table=mysql.event',
+      ignore_dbs        => [ 'information_schema', 'performance_schema' ],
     },
     psql                => {
       dbbackup_user     => 'postgres',
       dbbackup_password => '',
+      dumper            => 'pg_dump',
+      dump_flags        => '-Fc',
+      ignore_dbs        => [],
     },
     misc => {},
   }

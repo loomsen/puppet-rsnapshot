@@ -365,8 +365,18 @@ Default is:
 
 #### `$backup_scripts`
 Additional scripts to create, possible values are: mysql, psql, misc
-NOTE: this requires you to install the client packages you wish to use.
-      You can do this by passing an array to [$rsnapshot::package_name](#package_name)
+
+NOTE: the psql and mysql scripts will SSH into your host and try and use pg_dump/mysqldump respectively.
+Make sure you have those tools installed on your DB hosts.
+
+You can do this by passing an array to [$rsnapshot::package_name](#package_name)
+
+Example:
+```yaml
+rsnapshot::package_name:
+  - rsnapshot
+  - pbzip2
+```
 
 Default is:
 
@@ -414,6 +424,7 @@ This creates
 - a mysql backup script for `bazqux.de` using the credentials `myuser:mypassword`
 
 The scripts look like this:
+
 mysql:
 
 ```bash
@@ -422,10 +433,31 @@ host=bazqux.de
 user=myuser
 pass=mypassword
 
-dbs=( $(mysql -h "$host" -u "$user" -p"$pass" -e 'show databases' | sed '1d;/information_schema/d;/performance_schema/d')  )
+dbs=( 
+      $(ssh -l root "$host" "mysql -u ${user} -p${pass} -e 'show databases' | sed '1d;/information_schema/d;/performance_schema/d'")  
+    )
 
 for db in "${dbs[@]}"; do
-  mysqldump --host="$host" --user="$user" --password="$pass" --single-transaction --quick --routines --ignore-table=mysql.event "$db" > "$db".sql
+  ssh -l root "$host" "mysqldump --user=${user} --password=${pass} --single-transaction --quick --routines --ignore-table=mysql.event ${db}" > "${db}.sql"
+  wait
+  pbzip2 -p3 "$db".sql
+done      
+
+```
+
+mysql with root user:
+
+```bash
+#!/bin/bash
+host=bazqux.de
+user=root
+
+dbs=( 
+      $(ssh -l root "$host" "mysql -e 'show databases' | sed '1d;/information_schema/d;/performance_schema/d'")  
+    )
+
+for db in "${dbs[@]}"; do
+  ssh -l root "$host" "mysqldump --single-transaction --quick --routines --ignore-table=mysql.event ${db}" > "${db}.sql"
   wait
   pbzip2 -p3 "$db".sql
 done      
@@ -441,7 +473,9 @@ user=backupuser
 pass=password
 
 PGPASSWORD="$pass"
-dbs=( $(psql -h "$host" -U "$user" -Atc "SELECT datname FROM pg_database WHERE NOT datistemplate AND datname <> 'postgres'")   )
+dbs=( 
+      $(ssh -l root "$host" "psql -U ${user} -Atc \"SELECT datname FROM pg_database WHERE NOT datistemplate AND datname <> 'postgres'\"" )   
+    )
 
 for db in "${dbs[@]}"; do
   ssh -l root "$host" "pg_dump -U ${user} -Fc ${db}" > "$db".sql

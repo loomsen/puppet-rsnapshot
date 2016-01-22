@@ -135,21 +135,23 @@ class rsnapshot::config (
       content => template('rsnapshot/rsnapshot.erb'),
     }
 
+    
+
     if has_key($hash, backup_scripts) {
+      $hash[backup_scripts].each |$script, $scriptconf| {
+        $real_script       = deep_merge($rsnapshot::params::backup_scripts[$script], $rsnapshot::backup_scripts[$script], $hash[backup_scripts][$script])
+        notify { "$hash[backup_scripts][$script] for $host and $script": }
+        #        notify { "$real_script for $host and $script": }
+        $dbbackup_user     = $real_script[dbbackup_user]
+        $dbbackup_password = $real_script[dbbackup_password]
+        $dumper            = $real_script[dumper]
+        $dump_flags        = $real_script[dump_flags]
+        $ignore_dbs        = $real_script[ignore_dbs]
 
-      $hash[backup_scripts].each |$script, $credentials| {
-
-        if is_hash($credentials) {
-          $dbbackup_user     = $credentials['dbbackup_user']
-          $dbbackup_password = $credentials['dbbackup_password']
-        } else {
-          $dbbackup_user     = $rsnapshot::default_backup_scripts[$script]['dbbackup_user']
-          $dbbackup_password = $rsnapshot::default_backup_scripts[$script]['dbbackup_password']
-        }
 
         concat::fragment { "${host}_${script}_backup":
-          target  => $config,
-          content => "backup_script	${conf_d}/${host}.${script}.sh	./${script}\n",
+        target  => $config,
+        content => "backup_script	${conf_d}/${host}.${script}.sh	./${script}\n",
         }
 
         file { "${conf_d}/${host}.${script}.sh":
