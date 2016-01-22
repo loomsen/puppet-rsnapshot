@@ -372,7 +372,7 @@ Default is:
   $backup_scripts = {
     mysql             => {
       dbbackup_user     => 'root',
-      dbbackup_password => 'myFancyPassWord',
+      dbbackup_password => 'myPassWord',
     },
     psql                => {
       dbbackup_user     => 'postgres',
@@ -398,6 +398,8 @@ rsnapshot::hosts:
     backup_scripts:
       mysql:
       psql:
+        dbbackup_user: 'backupuser'
+        dbbackup_password: 'password'
   bazqux:de:
     backup_scripts:
       mysql:
@@ -408,6 +410,43 @@ rsnapshot::hosts:
 This creates 
 - a mysql and a psql backup script for `foobar.com` using the credentials `dbbackup:hunter2` for mysql and `dbbackup:yeshorsebatterystaple` for psql
 - a mysql backup script for `bazqux.de` using the credentials `myuser:mypassword`
+
+The scripts look like this:
+mysql:
+
+```bash
+#!/bin/bash
+host=bazqux.de
+user=myuser
+pass=mypassword
+
+dbs=( $(mysql -h "$host" -u "$user" -p"$pass" -e 'show databases' | sed '1d;/information_schema/d;/performance_schema/d')  )
+
+for db in "${dbs[@]}"; do
+  mysqldump --host="$host" --user="$user" --password="$pass" --single-transaction --quick --routines --ignore-table=mysql.event "$db" > "$db".sql
+  wait
+  pbzip2 -p3 "$db".sql
+done      
+
+```
+
+psql:
+
+```bash
+#!/bin/bash
+host=foobar.com
+user=backupuser
+pass=password
+
+PGPASSWORD="$pass"
+dbs=( $(psql -h "$host" -U "$user" -Atc "SELECT datname FROM pg_database WHERE NOT datistemplate AND datname <> 'postgres'")   )
+
+for db in "${dbs[@]}"; do
+  ssh -l root "$host" "pg_dump -U ${user} -Fc ${db}" > "$db".sql
+  wait
+  pbzip2 -p3 "$db".sql
+done
+```
 
 
 ### rsnapshot configuration variables
