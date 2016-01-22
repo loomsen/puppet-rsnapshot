@@ -140,8 +140,6 @@ class rsnapshot::config (
     if has_key($hash, backup_scripts) {
       $hash[backup_scripts].each |$script, $scriptconf| {
         $real_script       = deep_merge($rsnapshot::params::backup_scripts[$script], $rsnapshot::backup_scripts[$script], $hash[backup_scripts][$script])
-        notify { "$hash[backup_scripts][$script] for $host and $script": }
-        #        notify { "$real_script for $host and $script": }
         $dbbackup_user     = $real_script[dbbackup_user]
         $dbbackup_password = $real_script[dbbackup_password]
         $dumper            = $real_script[dumper]
