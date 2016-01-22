@@ -32,7 +32,7 @@ class rsnapshot::params {
   $config_logpath                = '/var/log/rsnapshot'
   $config_logfile                = '/var/log/rsnapshot.log'  # unused, we are logging to $logpath/$host.log
   $config_lockpath               = '/var/run/rsnapshot'
-  $config_snapshot_root          = '/backup/'
+  $config_snapshot_root          = '/backup'
   $config_no_create_root         = undef # bool, true or false
   $config_verbose                = '2'
   $config_loglevel               = '4'
