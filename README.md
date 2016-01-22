@@ -388,17 +388,17 @@ misc: custom commands to run on the node
 
 You can set 
 
-`$dbbackup_user` :     backup user
+`$dbbackup_user`:     backup user
 
-`$dbbackup_password` : password for the backup user
+`$dbbackup_password`: password for the backup user
 
-`dumper` :             path to the dump bin you wish to use
+`$dumper`:             path to the dump bin you wish to use
 
-`dump_flags`:          flags for your dump bin
+`$dump_flags`:          flags for your dump bin
 
-`ignore_dbs` :         databases to be ignored
+`$ignore_dbs`:         databases to be ignored (the psql script ignores template0 and template1 and postgres databases by default)
 
-`commands` :           array of commands to run on the host (this has no effect on psql and mysql scripts and is intended for your custom needs, see misc script section)
+`$commands`:           array of commands to run on the host (this has no effect on psql and mysql scripts and is intended for your custom needs, see misc script section)
 
 See below for defaults
 
