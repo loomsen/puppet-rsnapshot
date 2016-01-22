@@ -7,7 +7,11 @@ class rsnapshot::params {
   $config_backup_user            = 'root'
   $package_name                  = 'rsnapshot'
   $package_ensure                = 'present'
-  $cron_service_name             = 'crond'
+  $cron_service_name             = $::osfamily ? {
+    'RedHat' => 'crond',
+    'Debian' => 'cron',
+    default  => '',
+    }
   $cron_dir                      = '/etc/cron.d'
   $config_backup_levels          = [ 'daily', 'weekly', 'monthly' ]
   $config_backup_defaults        = true
@@ -63,6 +67,7 @@ class rsnapshot::params {
   }
   $config_backup_scripts         = {}
   $cron = {
+    mailto     => 'admin@example.com',
     hourly     => {
       minute   => '0..59',
       hour     => '*',      # you could also do:   ['21..23','0..4','5'],
@@ -93,14 +98,32 @@ class rsnapshot::params {
     },
   }
   $backup_scripts = {
-    mysql             => {
+    mysql               => {
       dbbackup_user     => 'root',
-      dbbackup_password => 'myFancyPassWord',
+      dbbackup_password => '',
+      dumper            => 'mysqldump',
+      dump_flags        => '--single-transaction --quick --routines --ignore-table=mysql.event',
+      ignore_dbs        => [ 'information_schema', 'performance_schema' ],
+      compress          => 'pbzip2',
     },
     psql                => {
       dbbackup_user     => 'postgres',
       dbbackup_password => '',
+      dumper            => 'pg_dump',
+      dump_flags        => '-Fc',
+      ignore_dbs        => [],
+      compress          => 'pbzip2',
     },
-    misc => {},
+    misc         => {
+      commands   => $::osfamily ? {
+        'RedHat' =>  [
+          'rpm -qa --qf="%{name}," > packages.txt',
+        ],
+        'Debian' => [
+          'dpkg --get-selections > packages.txt',
+        ],
+        default => [],
+      },
+    }
   }
 }

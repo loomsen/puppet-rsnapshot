@@ -133,10 +133,14 @@ rsnapshot::hosts:
     backup:
       '/var': './var'
     cron:
-      'daily':
-        'minute': '0-10'
-        'hour':   '1..5'
-
+      mailto: 'bar1@example.com'
+      daily:
+        minute: '0-10'
+        hour:   '1..5'
+  db1:
+    backup_scripts:
+      mysql:
+      misc:
 
 ```
 
@@ -243,10 +247,14 @@ The range notation is '$start..$end', so to pick a random hour from 8 pm to 2 am
 For the range feature to work, hours >0 and <10 must not have a preceding zero. 
 Wrong: `00.09`
 Correct: `0..9`
+Also, you can set a mailto for each host, or globally now. The settings will be merged bottom to top, so if you override a setting in a hosts cron, it will have precedence over the global setting,
+which in turn has precedence over the default.
+
 Example:
 
 ```puppet
   $cron = {
+    mailto     => 'admin@example.com',
     hourly     => {
       minute   => '0..59',
       hour     => [ '20..23','0..2' ],
@@ -259,6 +267,7 @@ Or in hiera:
 
 ```yaml
 rsnapshot::cron:
+  mailto: 'admin@example.com'
   daily:
     minute: '20'
   weekly:
@@ -270,16 +279,32 @@ rsnapshot::cron:
 ```yaml
 rsnapshot::hosts:
   webserver:
-    daily:
-      hour: [ '20..23','0..2' ]
-    weekly:
-      hour: [ '20..23','0..2' ]
+    cron:
+      mailto: 'support@example.com'
+      daily:
+        hour: [ '20..23','0..2' ]
+      weekly:
+        hour: [ '20..23','0..2' ]
+  
+  webhost:
+
+  customervm.provider.com:
+    backup_user: 'customer'
 ```
+
+`webhost`:  Mails will go to `admin@example.com` (from the global override).
+
+`webserver`: Mails will go to `support@example.com`.
+
+`customervm.provider.com`: The backup (and thus ssh) user will be `customer@customervm.provider.com`
+
+
 
 Hash is of the form:
 
 ```puppet
-$cron =>{
+$cron    =>{
+  mailto => param,
   daily => {
     minute => param,
     hour => param,
@@ -297,6 +322,7 @@ Default is:
 
 ```puppet
   $cron = {
+    mailto     => 'admin@example.com',
     hourly     => {
       minute   => '0..59',  # random from 0 to 59
       hour     => '*',      # you could also do:   ['21..23','0..4','5'],
@@ -366,20 +392,65 @@ Default is:
 #### `$backup_scripts`
 Additional scripts to create, possible values are: mysql, psql, misc
 
+`mysql`: used for mysql backups
+
+`psql`: used for postgresql backups
+
+`misc`: custom commands to run on the node
+
+You can set 
+
+`$dbbackup_user`:     backup user
+
+`$dbbackup_password`: password for the backup user
+
+`$dumper`:            path to the dump bin you wish to use
+
+`$dump_flags`:        flags for your dump bin
+
+`$ignore_dbs`:        databases to be ignored (the psql script ignores template and postgres databases by default)
+
+`$commands`:          array of commands to run on the host (this has no effect on psql and mysql scripts and is intended for your custom needs, see misc script section)
+
+See below for defaults
+
+NOTE: the psql and mysql scripts will SSH into your host and try and use $dumper.
+Make sure you have those tools installed on your DB hosts.
+
+Also, this module will try and use pbzip to compress your databases. You can install pbzip2 (and additional packages you might need) by passing an array to [$rsnapshot::package_name](#package_name)
+
+
 Default is:
 
 ```puppet
   $backup_scripts = {
-    mysql             => {
+    mysql               => {
       dbbackup_user     => 'root',
-      dbbackup_password => 'myPassWord',
+      dbbackup_password => '',
+      dumper            => 'mysqldump',
+      dump_flags        => '--single-transaction --quick --routines --ignore-table=mysql.event',
+      ignore_dbs        => [ 'information_schema', 'performance_schema' ],
     },
     psql                => {
       dbbackup_user     => 'postgres',
       dbbackup_password => '',
+      dumper            => 'pg_dump',
+      dump_flags        => '-Fc',
+      ignore_dbs        => [],
     },
-    misc => {},
+    misc         => {
+      commands   => $::osfamily ? {
+        'RedHat' =>  [
+          'rpm -qa --qf="%{name}," > packages.txt',
+        ],
+        'Debian' => [
+          'dpkg --get-selections > packages.txt',
+        ],
+        default => [],
+      },
+    }
   }
+
 ```
 
 Configuration example:
@@ -398,21 +469,31 @@ rsnapshot::hosts:
     backup_scripts:
       mysql:
       psql:
-        dbbackup_user: 'backupuser'
-        dbbackup_password: 'password'
+        dumper: '/usr/local/bin/pg_dump'
+        dump_flags: '-Fc'
+        ignore_dbs: [ 'db1', 'tmp_db' ]
+      misc:
   bazqux:de:
     backup_scripts:
       mysql:
         dbbackup_user: 'myuser'
         dbbackup_password: 'mypassword'
+      misc:
+        commands:
+          - 'cat /etc/hostname > hostname.txt'
+          - 'date > date.txt'
 ```
 
 This creates 
 - a mysql and a psql backup script for `foobar.com` using the credentials `dbbackup:hunter2` for mysql and `dbbackup:yeshorsebatterystaple` for psql
+- the psql script will use `/usr/local/bin/pg_dump` as the dump program with flags `-Fc`
+- it will ignore the postgres databases `db1` and `tmp_db` for postgres
 - a mysql backup script for `bazqux.de` using the credentials `myuser:mypassword`
+- a misc script for bazqux.de containing two commands to run on the node. the output will be redirected to hostname.txt and date.txt in the misc/ subfolder of the hosts backup directory (i.e. /snapshot_root/bazqux.de/daily.0/misc/hostname.txt)
 
 The scripts look like this:
-mysql:
+
+##### `bazqux.de`
 
 ```bash
 #!/bin/bash
@@ -420,32 +501,101 @@ host=bazqux.de
 user=myuser
 pass=mypassword
 
-dbs=( $(mysql -h "$host" -u "$user" -p"$pass" -e 'show databases' | sed '1d;/information_schema/d;/performance_schema/d')  )
+dbs=( 
+      $(ssh -l root "$host" "mysql -u ${user} -p${pass} -e 'show databases' | sed '1d;/information_schema/d;/performance_schema/d'")  
+    )
 
 for db in "${dbs[@]}"; do
-  mysqldump --host="$host" --user="$user" --password="$pass" --single-transaction --quick --routines --ignore-table=mysql.event "$db" > "$db".sql
+  ssh -l root "$host" "mysqldump --user=${user} --password=${pass} --single-transaction --quick --routines --ignore-table=mysql.event ${db}" > "${db}.sql"
   wait
-  pbzip2 -p3 "$db".sql
+  pbzip2 "$db".sql
 done      
 
 ```
+
+```bash
+#!/bin/bash
+
+ssh bazqux.de 'cat /etc/hostname > hostname.txt'
+
+ssh bazqux.de 'date > date.txt'
+
+```
+
+
+
+##### `foobar.com`
 
 psql:
 
 ```bash
 #!/bin/bash
 host=foobar.com
-user=backupuser
-pass=password
+user=dbbackup
+pass=yeshorsebatterystaple
 
 PGPASSWORD="$pass"
-dbs=( $(psql -h "$host" -U "$user" -Atc "SELECT datname FROM pg_database WHERE NOT datistemplate AND datname <> 'postgres'")   )
+dbs=( 
+      $(ssh -l root "$host" "psql -U ${user} -Atc \"SELECT datname FROM pg_database WHERE NOT datistemplate AND datname ~ 'postgres|db1|tmp_db'\"" )
+    )
 
 for db in "${dbs[@]}"; do
   ssh -l root "$host" "pg_dump -U ${user} -Fc ${db}" > "$db".sql
   wait
-  pbzip2 -p3 "$db".sql
+  pbzip2 "$db".sql
 done
+```
+
+mysql:
+
+
+```bash
+#!/bin/bash
+host=foobar.com
+user=dbbackup
+pass=hunter2
+
+dbs=( 
+      $(ssh -l root "$host" "mysql -u ${user} -p${pass} -e 'show databases' | sed '1d;/information_schema/d;/performance_schema/d'")  
+    )
+
+for db in "${dbs[@]}"; do
+  ssh -l root "$host" "mysqldump --user=${user} --password=${pass} --single-transaction --quick --routines --ignore-table=mysql.event ${db}" > "${db}.sql"
+  wait
+  pbzip2 "$db".sql
+done      
+
+```
+
+misc (assuming foobar.com is a RedHat node):
+
+```bash
+#!/bin/bash
+
+ssh foobar.com 'rpm -qa --qf "%{name}," > packages.txt'
+
+```
+
+##### another example with root user and empty password
+
+mysql with root user:
+
+```bash
+#!/bin/bash
+host=bazqux.de
+user=root
+password=
+
+dbs=( 
+      $(ssh -l root "$host" "mysql -e 'show databases' | sed '1d;/information_schema/d;/performance_schema/d'")  
+    )
+
+for db in "${dbs[@]}"; do
+  ssh -l root "$host" "mysqldump --single-transaction --quick --routines --ignore-table=mysql.event ${db}" > "${db}.sql"
+  wait
+  pbzip2 "$db".sql
+done      
+
 ```
 
 
@@ -596,4 +746,4 @@ Norbert Varzariu (loomsen)
 
 ## Contributors
 Please see the [list of contributors.](https://github.com/loomsen/puppet-bloonix_agent/graphs/contributors)
-
+A big thank you to Hendrik Horeis <hendrik.horeis@gmail.com> for all his input and testing of this module.
