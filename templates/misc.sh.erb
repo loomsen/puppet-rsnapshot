@@ -1,5 +1,6 @@
 #!/bin/bash
-
+#This file is managed by puppet
+#
 <%@commands.each do |command| -%>
 ssh <%=@host-%> '<%=command-%>'
 
