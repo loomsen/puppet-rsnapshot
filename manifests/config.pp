@@ -169,8 +169,14 @@ class rsnapshot::config (
     # create cron files for each backup level
     # merge possible cron definitions to one
     $real_cron = deep_merge($rsnapshot::params::cron, $rsnapshot::cron, $hash[cron])
+    concat::fragment { "mailto for $host":
+      content => "#This file is managed by puppet\nMAILTO=${real_cron[mailto]}\n\n",
+      target  => $cronfile,
+      order   => 1,
+    }
 
     $backup_levels.each |String $level| {
+      $mailto   = $real_cron[mailto]
       $minute   = rand_from_array($real_cron[$level][minute],   "${host}.${level}.minute")
       $hour     = rand_from_array($real_cron[$level][hour],     "${host}.${level}.hour")
       $monthday = rand_from_array($real_cron[$level][monthday], "${host}.${level}.monthday")
@@ -180,6 +186,7 @@ class rsnapshot::config (
       concat::fragment { "${host}.${level}":
         target  => $cronfile,
         content => template('rsnapshot/cron.erb'),
+        order   => 2,
       }
     }
   }

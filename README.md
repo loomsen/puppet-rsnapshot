@@ -243,10 +243,14 @@ The range notation is '$start..$end', so to pick a random hour from 8 pm to 2 am
 For the range feature to work, hours >0 and <10 must not have a preceding zero. 
 Wrong: `00.09`
 Correct: `0..9`
+Also, you can set a mailto for each host, or globally now. The settings will be merged bottom to top, so if you override a setting in a hosts cron, it will have precedence over the global setting,
+which in turn has precedence over the default.
+
 Example:
 
 ```puppet
   $cron = {
+    mailto     => 'admin@example.com',
     hourly     => {
       minute   => '0..59',
       hour     => [ '20..23','0..2' ],
@@ -259,6 +263,7 @@ Or in hiera:
 
 ```yaml
 rsnapshot::cron:
+  mailto: 'admin@example.com'
   daily:
     minute: '20'
   weekly:
@@ -270,16 +275,24 @@ rsnapshot::cron:
 ```yaml
 rsnapshot::hosts:
   webserver:
-    daily:
-      hour: [ '20..23','0..2' ]
-    weekly:
-      hour: [ '20..23','0..2' ]
+    cron:
+      mailto: 'support@example.com'
+      daily:
+        hour: [ '20..23','0..2' ]
+      weekly:
+        hour: [ '20..23','0..2' ]
+  webhost:
 ```
+
+Mails for webhost will go to admin@example.com (from the global override), those for webserver will go to support@example.com.
+
+
 
 Hash is of the form:
 
 ```puppet
-$cron =>{
+$cron    =>{
+  mailto => param,
   daily => {
     minute => param,
     hour => param,
@@ -297,6 +310,7 @@ Default is:
 
 ```puppet
   $cron = {
+    mailto     => 'admin@example.com',
     hourly     => {
       minute   => '0..59',  # random from 0 to 59
       hour     => '*',      # you could also do:   ['21..23','0..4','5'],
@@ -365,33 +379,42 @@ Default is:
 
 #### `$backup_scripts`
 Additional scripts to create, possible values are: mysql, psql, misc
+You can set 
+`$dbbackup_user` :     backup user
+`$dbbackup_password` : password for the backup user
+`dumper` :             path to the dump bin you wish to use
+`dump_flags`:          flags for your dump bin
+`ignore_dbs` :         databases to be ignored
 
-NOTE: the psql and mysql scripts will SSH into your host and try and use pg_dump/mysqldump respectively.
+See below for defaults
+
+NOTE: the psql and mysql scripts will SSH into your host and try and use $dumper.
 Make sure you have those tools installed on your DB hosts.
 
-You can do this by passing an array to [$rsnapshot::package_name](#package_name)
+Also, this module will try and use pbzip to compress your databases. You can install pbzip2 (and additional packages you might need) by passing an array to [$rsnapshot::package_name](#package_name)
 
-Example:
-```yaml
-rsnapshot::package_name:
-  - rsnapshot
-  - pbzip2
-```
 
 Default is:
 
 ```puppet
   $backup_scripts = {
-    mysql             => {
+    mysql               => {
       dbbackup_user     => 'root',
-      dbbackup_password => 'myPassWord',
+      dbbackup_password => '',
+      dumper            => 'mysqldump',
+      dump_flags        => '--single-transaction --quick --routines --ignore-table=mysql.event',
+      ignore_dbs        => [ 'information_schema', 'performance_schema' ],
     },
     psql                => {
       dbbackup_user     => 'postgres',
       dbbackup_password => '',
+      dumper            => 'pg_dump',
+      dump_flags        => '-Fc',
+      ignore_dbs        => [],
     },
     misc => {},
   }
+
 ```
 
 Configuration example:
@@ -410,8 +433,9 @@ rsnapshot::hosts:
     backup_scripts:
       mysql:
       psql:
-        dbbackup_user: 'backupuser'
-        dbbackup_password: 'password'
+        dumper: '/usr/local/bin/pg_dump'
+        dump_flags: '-Fc'
+        ignore_dbs: [ 'db1', 'tmp_db' ]
   bazqux:de:
     backup_scripts:
       mysql:
@@ -421,11 +445,13 @@ rsnapshot::hosts:
 
 This creates 
 - a mysql and a psql backup script for `foobar.com` using the credentials `dbbackup:hunter2` for mysql and `dbbackup:yeshorsebatterystaple` for psql
+- the psql script will use `/usr/local/bin/pg_dump` as the dump program with flags `-Fc`
+- it will ignore the postgres databases `db1` and `tmp_db` for postgres
 - a mysql backup script for `bazqux.de` using the credentials `myuser:mypassword`
 
 The scripts look like this:
 
-mysql:
+##### `bazqux.de`
 
 ```bash
 #!/bin/bash
@@ -440,10 +466,55 @@ dbs=(
 for db in "${dbs[@]}"; do
   ssh -l root "$host" "mysqldump --user=${user} --password=${pass} --single-transaction --quick --routines --ignore-table=mysql.event ${db}" > "${db}.sql"
   wait
-  pbzip2 -p3 "$db".sql
+  pbzip2 "$db".sql
 done      
 
 ```
+
+##### `foobar.com`
+
+psql:
+
+```bash
+#!/bin/bash
+host=foobar.com
+user=dbbackup
+pass=yeshorsebatterystaple
+
+PGPASSWORD="$pass"
+dbs=( 
+      $(ssh -l root "$host" "psql -U ${user} -Atc \"SELECT datname FROM pg_database WHERE NOT datistemplate AND datname ~ 'postgres|db1|tmp_db'\"" )
+    )
+
+for db in "${dbs[@]}"; do
+  ssh -l root "$host" "pg_dump -U ${user} -Fc ${db}" > "$db".sql
+  wait
+  pbzip2 "$db".sql
+done
+```
+
+mysql:
+
+
+```bash
+#!/bin/bash
+host=foobar.com
+user=dbbackup
+pass=hunter2
+
+dbs=( 
+      $(ssh -l root "$host" "mysql -u ${user} -p${pass} -e 'show databases' | sed '1d;/information_schema/d;/performance_schema/d'")  
+    )
+
+for db in "${dbs[@]}"; do
+  ssh -l root "$host" "mysqldump --user=${user} --password=${pass} --single-transaction --quick --routines --ignore-table=mysql.event ${db}" > "${db}.sql"
+  wait
+  pbzip2 "$db".sql
+done      
+
+```
+
+##### another example with root user and empty password
 
 mysql with root user:
 
@@ -451,6 +522,7 @@ mysql with root user:
 #!/bin/bash
 host=bazqux.de
 user=root
+password=
 
 dbs=( 
       $(ssh -l root "$host" "mysql -e 'show databases' | sed '1d;/information_schema/d;/performance_schema/d'")  
@@ -459,29 +531,9 @@ dbs=(
 for db in "${dbs[@]}"; do
   ssh -l root "$host" "mysqldump --single-transaction --quick --routines --ignore-table=mysql.event ${db}" > "${db}.sql"
   wait
-  pbzip2 -p3 "$db".sql
+  pbzip2 "$db".sql
 done      
 
-```
-
-psql:
-
-```bash
-#!/bin/bash
-host=foobar.com
-user=backupuser
-pass=password
-
-PGPASSWORD="$pass"
-dbs=( 
-      $(ssh -l root "$host" "psql -U ${user} -Atc \"SELECT datname FROM pg_database WHERE NOT datistemplate AND datname <> 'postgres'\"" )   
-    )
-
-for db in "${dbs[@]}"; do
-  ssh -l root "$host" "pg_dump -U ${user} -Fc ${db}" > "$db".sql
-  wait
-  pbzip2 -p3 "$db".sql
-done
 ```
 
 

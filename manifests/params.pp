@@ -63,6 +63,7 @@ class rsnapshot::params {
   }
   $config_backup_scripts         = {}
   $cron = {
+    mailto     => 'admin@example.com',
     hourly     => {
       minute   => '0..59',
       hour     => '*',      # you could also do:   ['21..23','0..4','5'],
