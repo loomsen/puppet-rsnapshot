@@ -13,6 +13,8 @@ dbs=(
 for db in "${dbs[@]}"; do
   ssh -l root "$host" "<%=@dumper-%> -U ${user} <%=@dump_flags-%> ${db}" > "$db".sql
   wait
-  pbzip2 "$db".sql
+<% if @compress != '' -%>
+  <%=@compress-%> "$db".sql
+<%end-%>
 done
 

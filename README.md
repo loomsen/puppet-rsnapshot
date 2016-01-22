@@ -385,7 +385,7 @@ You can set
 `dumper` :             path to the dump bin you wish to use
 `dump_flags`:          flags for your dump bin
 `ignore_dbs` :         databases to be ignored
-
+`commands` :           array of commands to run on the host (this has no effect on psql and mysql scripts and is intended for your custom needs, see misc script section)
 See below for defaults
 
 NOTE: the psql and mysql scripts will SSH into your host and try and use $dumper.
@@ -412,7 +412,16 @@ Default is:
       dump_flags        => '-Fc',
       ignore_dbs        => [],
     },
-    misc => {},
+    misc         => {
+      commands   => $::osfamily ? {
+        'RedHat' =>  [
+          'rpm -qa --qf="%{name}," > packages.txt',
+        ],
+        'Debian' => [
+          'dpkg --get-selections > packages.txt',
+        ],
+        default => [],
+      },
   }
 
 ```
@@ -436,11 +445,16 @@ rsnapshot::hosts:
         dumper: '/usr/local/bin/pg_dump'
         dump_flags: '-Fc'
         ignore_dbs: [ 'db1', 'tmp_db' ]
+      misc:
   bazqux:de:
     backup_scripts:
       mysql:
         dbbackup_user: 'myuser'
         dbbackup_password: 'mypassword'
+      misc:
+        commands:
+          - 'cat /etc/hostname > hostname.txt'
+          - 'date > date.txt'
 ```
 
 This creates 
@@ -448,6 +462,7 @@ This creates
 - the psql script will use `/usr/local/bin/pg_dump` as the dump program with flags `-Fc`
 - it will ignore the postgres databases `db1` and `tmp_db` for postgres
 - a mysql backup script for `bazqux.de` using the credentials `myuser:mypassword`
+- a misc script for bazqux.de containing two commands to run on the node. the output will be redirected to hostname.txt and date.txt in the misc/ subfolder of the hosts backup directory (i.e. /snapshot_root/bazqux.de/daily.0/misc/hostname.txt)
 
 The scripts look like this:
 
@@ -470,6 +485,17 @@ for db in "${dbs[@]}"; do
 done      
 
 ```
+
+```bash
+#!/bin/bash
+
+ssh bazqux.de 'cat /etc/hostname > hostname.txt'
+
+ssh bazqux.de 'date > date.txt'
+
+```
+
+
 
 ##### `foobar.com`
 
@@ -511,6 +537,15 @@ for db in "${dbs[@]}"; do
   wait
   pbzip2 "$db".sql
 done      
+
+```
+
+misc (assuming foobar.com is a RedHat node):
+
+```bash
+#!/bin/bash
+
+ssh foobar.com 'rpm -qa --qf "%{name}," > packages.txt'
 
 ```
 

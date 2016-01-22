@@ -7,7 +7,11 @@ class rsnapshot::params {
   $config_backup_user            = 'root'
   $package_name                  = 'rsnapshot'
   $package_ensure                = 'present'
-  $cron_service_name             = 'crond'
+  $cron_service_name             = $::osfamily ? {
+    'RedHat' => 'crond',
+    'Debian' => 'cron',
+    default  => '',
+    }
   $cron_dir                      = '/etc/cron.d'
   $config_backup_levels          = [ 'daily', 'weekly', 'monthly' ]
   $config_backup_defaults        = true
@@ -100,6 +104,7 @@ class rsnapshot::params {
       dumper            => 'mysqldump',
       dump_flags        => '--single-transaction --quick --routines --ignore-table=mysql.event',
       ignore_dbs        => [ 'information_schema', 'performance_schema' ],
+      compress          => 'pbzip2',
     },
     psql                => {
       dbbackup_user     => 'postgres',
@@ -107,7 +112,18 @@ class rsnapshot::params {
       dumper            => 'pg_dump',
       dump_flags        => '-Fc',
       ignore_dbs        => [],
+      compress          => 'pbzip2',
     },
-    misc => {},
+    misc         => {
+      commands   => $::osfamily ? {
+        'RedHat' =>  [
+          'rpm -qa --qf="%{name}," > packages.txt',
+        ],
+        'Debian' => [
+          'dpkg --get-selections > packages.txt',
+        ],
+        default => [],
+      },
+    }
   }
 }

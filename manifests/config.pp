@@ -147,7 +147,8 @@ class rsnapshot::config (
         $dumper            = $real_script[dumper]
         $dump_flags        = $real_script[dump_flags]
         $ignore_dbs        = $real_script[ignore_dbs]
-
+        $compress          = $real_script[compress]
+        $commands          = $real_script[commands]
 
         concat::fragment { "${host}_${script}_backup":
         target  => $config,

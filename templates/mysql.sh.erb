@@ -22,6 +22,8 @@ for db in "${dbs[@]}"; do
   ssh -l root "$host" "<%=@dumper-%>  --user=<%=@dbbackup_user-%> --password='<%=@dbbackup_password-%>' <%=@dump_flags-%> ${db}" > "$db".sql
 <%end-%>
   wait
-  pbzip2 "$db".sql
+<% if @compress != '' -%>
+  <%=@compress-%> "$db".sql
+<%end-%>
 done
 
