@@ -436,7 +436,7 @@ Default is:
       dbbackup_password => '',
       dumper            => 'pg_dump',
       dump_flags        => '-Fc',
-      ignore_dbs        => [],
+      ignore_dbs        => [ 'postgres' ],
     },
     misc         => {
       commands   => $::osfamily ? {
