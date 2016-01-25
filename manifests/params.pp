@@ -111,7 +111,7 @@ class rsnapshot::params {
       dbbackup_password => '',
       dumper            => 'pg_dump',
       dump_flags        => '-Fc',
-      ignore_dbs        => [],
+      ignore_dbs        => [ 'postgres' ],
       compress          => 'pbzip2',
     },
     misc         => {
