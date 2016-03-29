@@ -1,6 +1,6 @@
 {
   "name": "loomsen-rsnapshot",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "loomsen",
   "summary": "Configures rsnapshot.",
   "license": "Apache-2.0",
