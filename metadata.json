@@ -18,7 +18,8 @@
   ],
   "dependencies": [
     { "name": "puppetlabs-stdlib","version_range": ">= 1.0.0" },
-    { "name": "stahnma-epel","version_range": ">= 1.0.0" }
+    { "name": "stahnma-epel","version_range": ">= 1.0.0" },
+    { "name": "puppetlabs-concat","version_range": ">= 2.0.0 < 3.0.0" }
   ],
   "operatingsystem_support": [
     {
