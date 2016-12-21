@@ -16,7 +16,7 @@ dbs=(
     )
 <%end-%>
 for db in "${dbs[@]}"; do
-<% if (@dbbackup_user == 'root' && @dbbackup_password = '' )-%>
+<% if (@dbbackup_user == 'root' && @dbbackup_password == '' )-%>
   ssh -l <%=@backup_user-%> "$host" "<%=@dumper-%> <%=@dump_flags-%> ${db}" > "$db".sql
 <%else-%>
   ssh -l <%=@backup_user-%> "$host" "<%=@dumper-%>  --user=<%=@dbbackup_user-%> --password='<%=@dbbackup_password-%>' <%=@dump_flags-%> ${db}" > "$db".sql
