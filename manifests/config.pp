@@ -162,15 +162,24 @@ class rsnapshot::config (
       }
     }
 
-    $cronfile = "${cron_dir}/${host}"
-    concat { $cronfile:
+    # cron on Debian seems to ignore files that have dots in their name; replace
+    # them with underscores (issue #2)
+    $cron_name = regsubst("${host}", '\.', '_')
+    $cron_file = "${cron_dir}/${cron_name}"
+
+    # Make sure old cron files are removed
+    file { "${cron_dir}/${host}":
+      ensure => absent,
+    }
+
+    concat { $cron_file:
     }
     # create cron files for each backup level
     # merge possible cron definitions to one
     $real_cron = deep_merge($rsnapshot::params::cron, $rsnapshot::cron, $hash[cron])
     concat::fragment { "mailto for ${host}":
       content => "#This file is managed by puppet\nMAILTO=${real_cron[mailto]}\n\n",
-      target  => $cronfile,
+      target  => $cron_file,
       order   => 1,
     }
 
@@ -183,7 +192,7 @@ class rsnapshot::config (
       $weekday  = rand_from_array($real_cron[$level][weekday],  "${host}.${level}.weekday")
 
       concat::fragment { "${host}.${level}":
-        target  => $cronfile,
+        target  => $cron_file,
         content => template('rsnapshot/cron.erb'),
         order   => 2,
       }
