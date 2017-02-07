@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/loomsen/puppet-rsnapshot.svg?branch=master)](https://travis-ci.org/loomsen/puppet-rsnapshot)
+
 # rsnapshot
 
 #### Table of Contents
