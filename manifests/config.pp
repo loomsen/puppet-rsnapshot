@@ -31,7 +31,7 @@ class rsnapshot::config (
 
   # custom function, if only a hostname is given as a param, this is an empty hash
   # the next loop would break as puppet does not allow to reassign variables
-  # the function checks $hosts for elements like: 
+  # the function checks $hosts for elements like:
   # { foo => } and converts those to { foo => {} }
   $hosts_clean = assert_empty_hash($hosts)
 
@@ -135,7 +135,7 @@ class rsnapshot::config (
       content => template('rsnapshot/rsnapshot.erb'),
     }
 
-    
+
 
     if has_key($hash, backup_scripts) {
       $hash[backup_scripts].each |$script, $scriptconf| {
@@ -154,11 +154,11 @@ class rsnapshot::config (
         }
 
         file { "${conf_d}/${host}.${script}.sh":
-          ensure  => present,
+          ensure  => file,
           content => template("rsnapshot/${script}.sh.erb"),
           mode    => '0755',
         }
-        
+
       }
     }
 
@@ -168,7 +168,7 @@ class rsnapshot::config (
     # create cron files for each backup level
     # merge possible cron definitions to one
     $real_cron = deep_merge($rsnapshot::params::cron, $rsnapshot::cron, $hash[cron])
-    concat::fragment { "mailto for $host":
+    concat::fragment { "mailto for ${host}":
       content => "#This file is managed by puppet\nMAILTO=${real_cron[mailto]}\n\n",
       target  => $cronfile,
       order   => 1,
@@ -190,4 +190,3 @@ class rsnapshot::config (
     }
   }
 }
-
