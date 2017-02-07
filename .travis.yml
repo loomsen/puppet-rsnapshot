@@ -10,3 +10,7 @@ matrix:
     env: PUPPET_GEM_VERSION="~> 4.0"
 notifications:
   email: false
+language: ruby
+rvm:
+  - 2.1
+  - jruby
