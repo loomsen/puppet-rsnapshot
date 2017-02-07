@@ -6,8 +6,8 @@
 host=<%=@host%>
 user=<%=@dbbackup_user%>
 
-dbs=( 
-      $(ssh -l <%=@backup_user-%> "$host" "PGPASSWORD='<%=@dbbackup_password%>' psql -U ${user} -Atc \"SELECT datname FROM pg_database WHERE NOT datistemplate AND NOT datname ~ '<%@ignore_dbs.each do |db|-%><%if db == @ignore_dbs.last-%><%=db-%><%else-%><%=db-%>|<%end-%><%end-%>'\"")  
+dbs=(
+      $(ssh -l <%=@backup_user-%> "$host" "PGPASSWORD='<%=@dbbackup_password%>' psql -U ${user} -Atc \"SELECT datname FROM pg_database WHERE NOT datistemplate AND NOT datname ~ '<%@ignore_dbs.each do |db|-%><%if db == @ignore_dbs.last-%><%=db-%><%else-%><%=db-%>|<%end-%><%end-%>'\"")
     )
 for db in "${dbs[@]}"; do
   ssh -l <%=@backup_user-%> "$host" "PGPASSWORD='<%=@dbbackup_password%>' <%=@dumper-%> -U ${user} <%=@dump_flags-%> ${db}" > "$db".sql
@@ -16,4 +16,3 @@ for db in "${dbs[@]}"; do
   <%=@compress-%> "$db".sql
 <%end-%>
 done
-

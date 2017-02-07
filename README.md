@@ -50,7 +50,7 @@ It will create repeatable random cron entries from a configurable timerange for 
 
 ### Getting Started
 
-You will need to pass the nodenames to be backed up at least. 
+You will need to pass the nodenames to be backed up at least.
 This will pickup all defaults and add localhost to the backups:
 
 
@@ -102,7 +102,7 @@ A more complete hiera example:
 
 ```yaml
 ---
-classes: 
+classes:
   - rsnapshot
 
 # override default backup dirs for all hosts:
@@ -147,7 +147,7 @@ rsnapshot::hosts:
 
 
 ### More options
-The defaults are pretty reasonable, I hope. However, you may override pretty much anything. Available parameters are discussed below. 
+The defaults are pretty reasonable, I hope. However, you may override pretty much anything. Available parameters are discussed below.
 
 #### Specials
 As mentioned, this module will generate random time entries for your hosts. The random number generator is hashed with hostname and backup_level, so the randomness will be repeatable per host.level. This is important so puppet won't override the crons with each run.
@@ -170,7 +170,7 @@ So it would look something like:
 
 ```
 1 4 * * * foo daily
-``` 
+```
 
 or maybe
 
@@ -209,17 +209,17 @@ The following parameters are available in the `::rsnapshot` class:
 Hash containing the hosts to be backed up and optional overrides per host
 (Default: undef (do nothing when no host given))
 #### `$conf_d`
-The place where the configs will be dropped 
+The place where the configs will be dropped
 (Default: /etc/rsnapshot (will be created if it doesn't exist))
 #### `$backup_user`
-The user to run the backup scripts as 
+The user to run the backup scripts as
 (Default: root, also the user used for ssh connections, if you change this make sure you have proper key deployed and the user exists in the nodes to be backed up.)
 #### `$package_name`
 (Default: rsnapshot)
 #### `$package_ensure`
 (Default: present)
 #### `$cron_dir`
-Directory to drop the cron files to. Crons will be created per host. 
+Directory to drop the cron files to. Crons will be created per host.
 (Default: /etc/cron.d)
 #### `$backup_levels`
 Array containing the backup levels (hourly, daily, weekly, monthly)
@@ -242,9 +242,9 @@ Default is:
 
 #### `$cron`
 Hash. Set time ranges for different backup levels. Each item (minute, hour...) allows for cron notation, an array to pick a random time from and a range to pick a random time from.
-The range notation is '$start..$end', so to pick a random hour from 8 pm to 2 am, you could set the hour of your desired backup level to 
+The range notation is '$start..$end', so to pick a random hour from 8 pm to 2 am, you could set the hour of your desired backup level to
 `[ '20..23','0..2' ]`
-For the range feature to work, hours >0 and <10 must not have a preceding zero. 
+For the range feature to work, hours >0 and <10 must not have a preceding zero.
 Wrong: `00.09`
 Correct: `0..9`
 Also, you can set a mailto for each host, or globally now. The settings will be merged bottom to top, so if you override a setting in a hosts cron, it will have precedence over the global setting,
@@ -285,7 +285,7 @@ rsnapshot::hosts:
         hour: [ '20..23','0..2' ]
       weekly:
         hour: [ '20..23','0..2' ]
-  
+
   webhost:
 
   customervm.provider.com:
@@ -398,7 +398,7 @@ Additional scripts to create, possible values are: mysql, psql, misc
 
 `misc`: custom commands to run on the node
 
-You can set 
+You can set
 
 `$dbbackup_user`:     backup user
 
@@ -484,7 +484,7 @@ rsnapshot::hosts:
           - 'date > date.txt'
 ```
 
-This creates 
+This creates
 - a mysql and a psql backup script for `foobar.com` using the credentials `dbbackup:hunter2` for mysql and `dbbackup:yeshorsebatterystaple` for psql
 - the psql script will use `/usr/local/bin/pg_dump` as the dump program with flags `-Fc`
 - it will ignore the postgres databases `db1` and `tmp_db` for postgres
@@ -501,15 +501,15 @@ host=bazqux.de
 user=myuser
 pass=mypassword
 
-dbs=( 
-      $(ssh -l root "$host" "mysql -u ${user} -p${pass} -e 'show databases' | sed '1d;/information_schema/d;/performance_schema/d'")  
+dbs=(
+      $(ssh -l root "$host" "mysql -u ${user} -p${pass} -e 'show databases' | sed '1d;/information_schema/d;/performance_schema/d'")
     )
 
 for db in "${dbs[@]}"; do
   ssh -l root "$host" "mysqldump --user=${user} --password=${pass} --single-transaction --quick --routines --ignore-table=mysql.event ${db}" > "${db}.sql"
   wait
   pbzip2 "$db".sql
-done      
+done
 
 ```
 
@@ -535,7 +535,7 @@ user=dbbackup
 pass=yeshorsebatterystaple
 
 PGPASSWORD="$pass"
-dbs=( 
+dbs=(
       $(ssh -l root "$host" "psql -U ${user} -Atc \"SELECT datname FROM pg_database WHERE NOT datistemplate AND datname ~ 'postgres|db1|tmp_db'\"" )
     )
 
@@ -555,15 +555,15 @@ host=foobar.com
 user=dbbackup
 pass=hunter2
 
-dbs=( 
-      $(ssh -l root "$host" "mysql -u ${user} -p${pass} -e 'show databases' | sed '1d;/information_schema/d;/performance_schema/d'")  
+dbs=(
+      $(ssh -l root "$host" "mysql -u ${user} -p${pass} -e 'show databases' | sed '1d;/information_schema/d;/performance_schema/d'")
     )
 
 for db in "${dbs[@]}"; do
   ssh -l root "$host" "mysqldump --user=${user} --password=${pass} --single-transaction --quick --routines --ignore-table=mysql.event ${db}" > "${db}.sql"
   wait
   pbzip2 "$db".sql
-done      
+done
 
 ```
 
@@ -586,15 +586,15 @@ host=bazqux.de
 user=root
 password=
 
-dbs=( 
-      $(ssh -l root "$host" "mysql -e 'show databases' | sed '1d;/information_schema/d;/performance_schema/d'")  
+dbs=(
+      $(ssh -l root "$host" "mysql -e 'show databases' | sed '1d;/information_schema/d;/performance_schema/d'")
     )
 
 for db in "${dbs[@]}"; do
   ssh -l root "$host" "mysqldump --single-transaction --quick --routines --ignore-table=mysql.event ${db}" > "${db}.sql"
   wait
   pbzip2 "$db".sql
-done      
+done
 
 ```
 
@@ -692,7 +692,7 @@ Default is:  undef
 Default is:  '-az'
 
 #### `$rsync_long_args`
-rsync defaults are: --delete --numeric-ids --relative --delete-excluded 
+rsync defaults are: --delete --numeric-ids --relative --delete-excluded
 Default is:  undef
 
 #### `$ssh_args`

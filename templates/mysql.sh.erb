@@ -7,11 +7,11 @@ host=<%=@host%>
 user=<%=@dbbackup_user%>
 
 <% if (@dbbackup_user == 'root' && @dbbackup_password == '') -%>
-dbs=( 
-      $(ssh -l <%=@backup_user-%> "$host" "mysql -e 'show databases' | sed '1d;<%@ignore_dbs.to_a.each do |db|-%>/<%=db-%>/d;<%end-%>'" ) 
+dbs=(
+      $(ssh -l <%=@backup_user-%> "$host" "mysql -e 'show databases' | sed '1d;<%@ignore_dbs.to_a.each do |db|-%>/<%=db-%>/d;<%end-%>'" )
     )
 <%else-%>
-dbs=( 
+dbs=(
       $(ssh -l <%=@backup_user-%> "$host" "mysql -u <%=@dbbackup_user-%> -p'<%=@dbbackup_password-%>' -e 'show databases' | sed '1d;<%@ignore_dbs.each do |db|-%>/<%=db-%>/d;<%end-%>'" )
     )
 <%end-%>
@@ -26,4 +26,3 @@ for db in "${dbs[@]}"; do
   <%=@compress-%> "$db".sql
 <%end-%>
 done
-
