@@ -20,7 +20,6 @@ class rsnapshot (
   $backup_levels                 = $rsnapshot::params::config_backup_levels,
   $cron_service_name             = $rsnapshot::params::cron_service_name,
   $rsnapshot_prefix             =  $rsnapshot::params::config_rsnapshot_prefix,
-  
 ) inherits rsnapshot::params {
 
   $default_backup_scripts = $rsnapshot::params::backup_scripts + $backup_scripts
