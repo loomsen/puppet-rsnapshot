@@ -31,7 +31,7 @@ class rsnapshot::config (
 
   # custom function, if only a hostname is given as a param, this is an empty hash
   # the next loop would break as puppet does not allow to reassign variables
-  # the function checks $hosts for elements like: 
+  # the function checks $hosts for elements like:
   # { foo => } and converts those to { foo => {} }
   $hosts_clean = assert_empty_hash($hosts)
 
@@ -135,7 +135,7 @@ class rsnapshot::config (
       content => template('rsnapshot/rsnapshot.erb'),
     }
 
-    
+
 
     if has_key($hash, backup_scripts) {
       $hash[backup_scripts].each |$script, $scriptconf| {
@@ -158,11 +158,25 @@ class rsnapshot::config (
           content => template("rsnapshot/${script}.sh.erb"),
           mode    => '0755',
         }
-        
+
       }
     }
 
-    $cronfile = "${cron_dir}/${host}"
+    # cron on Debian seems to ignore files that have dots in their name; replace
+    # them with underscores (issue #2)
+    if $::osfamily == 'Debian' {
+      $cron_name = regsubst("${host}", '\.', '_')
+      $cronfile = "${cron_dir}/${rsnapshot_prefix}${cron_name}"
+    }
+    else {
+      $cronfile = "${cron_dir}/${rsnapshot_prefix}${host}"
+    }
+
+    # Make sure old cron files without rsnapshot_prefix are removed
+    file { "${cron_dir}/${host}":
+      ensure => absent,
+    }
+
     concat { $cronfile:
     }
     # create cron files for each backup level
@@ -190,4 +204,3 @@ class rsnapshot::config (
     }
   }
 }
-
