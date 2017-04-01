@@ -162,10 +162,14 @@ class rsnapshot::config (
       }
     }
 
+    if rsnapshot_prefix_use == false {
+      $rsnapshot_prefix = ''
+    }
+
     # cron on Debian seems to ignore files that have dots in their name; replace
     # them with underscores (issue #2)
     if $::osfamily == 'Debian' {
-      $cron_name = regsubst("${host}", '\.', '_')
+      $cron_name = regsubst($host, '\.', '_', 'G')
       $cronfile = "${cron_dir}/${rsnapshot_prefix}${cron_name}"
     }
     else {
@@ -182,7 +186,7 @@ class rsnapshot::config (
     # create cron files for each backup level
     # merge possible cron definitions to one
     $real_cron = deep_merge($rsnapshot::params::cron, $rsnapshot::cron, $hash[cron])
-    concat::fragment { "mailto for $host":
+    concat::fragment { "mailto for ${host}":
       content => "#This file is managed by puppet\nMAILTO=${real_cron[mailto]}\n\n",
       target  => $cronfile,
       order   => 1,
