@@ -16,6 +16,7 @@ class rsnapshot::params {
   $config_backup_levels          = [ 'daily', 'weekly', 'monthly' ]
   $config_backup_defaults        = true
   $config_version                = '1.2'
+  $config_check_mk_job           = false
   $config_cmd_cp                 = '/bin/cp'
   $config_cmd_rm                 = '/bin/rm'
   $config_cmd_rsync              = '/usr/bin/rsync'
@@ -25,6 +26,8 @@ class rsnapshot::params {
   $config_cmd_rsnapshot_diff     = '/usr/bin/rsnapshot-diff'
   $config_cmd_preexec            = undef
   $config_cmd_postexec           = undef
+  $config_cronfile_prefix        = 'rsnapshot_'
+  $config_cronfile_prefix_use    = false
   $config_use_lvm                = undef
   $config_linux_lvm_cmd_lvcreate = undef # '/sbin/lvcreate'
   $config_linux_lvm_cmd_lvremove = undef # '/sbin/lvremove'
@@ -43,7 +46,7 @@ class rsnapshot::params {
   $config_loglevel               = '4'
   $config_stop_on_stale_lockfile = undef # bool
   $config_rsync_short_args       = '-az'
-  $config_rsync_long_args        = undef # defaults are --delete --numeric-ids --relative --delete-excluded 
+  $config_rsync_long_args        = undef # defaults are --delete --numeric-ids --relative --delete-excluded
   $config_ssh_args               = undef
   $config_du_args                = undef
   $config_one_fs                 = undef
@@ -124,6 +127,6 @@ class rsnapshot::params {
         ],
         default => [],
       },
-    }
+    },
   }
 }

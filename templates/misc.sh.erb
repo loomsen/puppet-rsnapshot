@@ -2,6 +2,6 @@
 #This file is managed by puppet
 #
 <%@commands.each do |command| -%>
-ssh -l <%=@backup_user-%> <%=@host-%> <%=command-%>
+ssh -l <%=@backup_user-%> <%=@host-%> '<%=command-%>'
 
 <%end-%>
