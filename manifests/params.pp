@@ -43,6 +43,8 @@ class rsnapshot::params {
   $config_verbose                = '2'
   $config_loglevel               = '4'
   $config_stop_on_stale_lockfile = undef # bool
+  $config_cronfile_prefix        = 'rsnapshot_'
+  $config_cronfile_prefix_use    = false
   $config_rsync_short_args       = '-az'
   $config_rsync_long_args        = undef # defaults are --delete --numeric-ids --relative --delete-excluded
   $config_ssh_args               = undef
@@ -125,6 +127,6 @@ class rsnapshot::params {
         ],
         default => [],
       },
-    }
+    },
   }
 }

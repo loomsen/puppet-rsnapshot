@@ -2,8 +2,8 @@
 #
 # manage host configs
 class rsnapshot::config (
-  $hosts          = $rsnapshot::hosts,
-  $cron_dir       = $rsnapshot::cron_dir,
+  $hosts                = $rsnapshot::hosts,
+  $cron_dir             = $rsnapshot::cron_dir,
 ) {
 
   # these are global settings, no point in setting them per host
@@ -12,6 +12,8 @@ class rsnapshot::config (
   $conf_d                 = pick($rsnapshot::conf_d, $rsnapshot::params::conf_d, '/etc/rsnapshot')
   $snapshot_root          = pick($hosts['snapshot_root'], $rsnapshot::snapshot_root, '/backup')
   $logpath                = pick($rsnapshot::logpath, $rsnapshot::params::config_logpath)
+  $cronfile_prefix_use    = pick($rsnapshot::cronfile_prefix_use, $rsnapshot::params::cronfile_prefix_use, false)
+  $cronfile_prefix        = pick($rsnapshot::cronfile_prefix, $rsnapshot::params::cronfile_prefix, '')
   # make sure lock path and conf path exist
   file { $conf_d:
     ensure => 'directory',
@@ -31,7 +33,7 @@ class rsnapshot::config (
 
   # custom function, if only a hostname is given as a param, this is an empty hash
   # the next loop would break as puppet does not allow to reassign variables
-  # the function checks $hosts for elements like: 
+  # the function checks $hosts for elements like:
   # { foo => } and converts those to { foo => {} }
   $hosts_clean = assert_empty_hash($hosts)
 
@@ -135,7 +137,7 @@ class rsnapshot::config (
       content => template('rsnapshot/rsnapshot.erb'),
     }
 
-    
+
 
     if has_key($hash, backup_scripts) {
       $hash[backup_scripts].each |$script, $scriptconf| {
@@ -158,17 +160,37 @@ class rsnapshot::config (
           content => template("rsnapshot/${script}.sh.erb"),
           mode    => '0755',
         }
-        
+
       }
     }
 
-    $cronfile = "${cron_dir}/${host}"
+    if $cronfile_prefix_use  {
+      $rsnapshot_prefix = $rsnapshot::cronfile_prefix
+    } else {
+        $rsnapshot_prefix = ''
+    }
+
+    # cron on Debian seems to ignore files that have dots in their name; replace
+    # them with underscores (issue #2)
+    case $::osfamily {
+      'Debian': {
+        $cron_name = regsubst($host, '\.', '_', 'G')
+        $cronfile = "${cron_dir}/${rsnapshot_prefix}${cron_name}"
+      }
+      'RedHat': {
+        $cronfile = "${cron_dir}/${rsnapshot_prefix}${host}"
+      }
+      default: {
+        $cronfile = "${cron_dir}/${rsnapshot_prefix}${host}"
+      }
+    }
+
     concat { $cronfile:
     }
     # create cron files for each backup level
     # merge possible cron definitions to one
     $real_cron = deep_merge($rsnapshot::params::cron, $rsnapshot::cron, $hash[cron])
-    concat::fragment { "mailto for $host":
+    concat::fragment { "mailto for ${host}":
       content => "#This file is managed by puppet\nMAILTO=${real_cron[mailto]}\n\n",
       target  => $cronfile,
       order   => 1,
@@ -190,4 +212,3 @@ class rsnapshot::config (
     }
   }
 }
-
