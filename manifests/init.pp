@@ -19,8 +19,8 @@ class rsnapshot (
   $snapshot_root           = $rsnapshot::params::config_snapshot_root,
   $backup_levels           = $rsnapshot::params::config_backup_levels,
   $cron_service_name       = $rsnapshot::params::cron_service_name,
-  $rsnapshot_prefix        = $rsnapshot::params::config_rsnapshot_prefix,
-  $rsnapshot_prefix_use    = $rsnapshot::params::config_rsnapshot_prefix_use,
+  $cronfile_prefix         = $rsnapshot::params::config_cronfile_prefix,
+  $cronfile_prefix_use     = $rsnapshot::params::config_cronfile_prefix_use,
   $check_mk_job            = $rsnapshot::params::config_check_mk_job,
 
 ) inherits rsnapshot::params {

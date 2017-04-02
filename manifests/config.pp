@@ -2,8 +2,8 @@
 #
 # manage host configs
 class rsnapshot::config (
-  $hosts          = $rsnapshot::hosts,
-  $cron_dir       = $rsnapshot::cron_dir,
+  $hosts                = $rsnapshot::hosts,
+  $cron_dir             = $rsnapshot::cron_dir,
 ) {
 
   # these are global settings, no point in setting them per host
@@ -12,6 +12,8 @@ class rsnapshot::config (
   $conf_d                 = pick($rsnapshot::conf_d, $rsnapshot::params::conf_d, '/etc/rsnapshot')
   $snapshot_root          = pick($hosts['snapshot_root'], $rsnapshot::snapshot_root, '/backup')
   $logpath                = pick($rsnapshot::logpath, $rsnapshot::params::config_logpath)
+  $cronfile_prefix_use    = pick($rsnapshot::cronfile_prefix_use, $rsnapshot::params::cronfile_prefix_use, false)
+  $cronfile_prefix        = pick($rsnapshot::cronfile_prefix, $rsnapshot::params::cronfile_prefix, '')
   # make sure lock path and conf path exist
   file { $conf_d:
     ensure => 'directory',
@@ -162,23 +164,25 @@ class rsnapshot::config (
       }
     }
 
-    if rsnapshot_prefix_use == false {
-      $rsnapshot_prefix = ''
+    if $cronfile_prefix_use  {
+      $rsnapshot_prefix = $rsnapshot::cronfile_prefix
+    } else {
+        $rsnapshot_prefix = ''
     }
 
     # cron on Debian seems to ignore files that have dots in their name; replace
     # them with underscores (issue #2)
-    if $::osfamily == 'Debian' {
-      $cron_name = regsubst($host, '\.', '_', 'G')
-      $cronfile = "${cron_dir}/${rsnapshot_prefix}${cron_name}"
-    }
-    else {
-      $cronfile = "${cron_dir}/${rsnapshot_prefix}${host}"
-    }
-
-    # Make sure old cron files without rsnapshot_prefix are removed
-    file { "${cron_dir}/${host}":
-      ensure => absent,
+    case $::osfamily {
+      'Debian': {
+        $cron_name = regsubst($host, '\.', '_', 'G')
+        $cronfile = "${cron_dir}/${rsnapshot_prefix}${cron_name}"
+      }
+      'RedHat': {
+        $cronfile = "${cron_dir}/${rsnapshot_prefix}${host}"
+      }
+      default: {
+        $cronfile = "${cron_dir}/${rsnapshot_prefix}${host}"
+      }
     }
 
     concat { $cronfile:
