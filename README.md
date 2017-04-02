@@ -205,41 +205,20 @@ Takes an Integer, a String or an Array as input, and returns a random entry from
 
 The following parameters are available in the `::rsnapshot` class:
 
-#### `$hosts`
-Hash containing the hosts to be backed up and optional overrides per host
-(Default: undef (do nothing when no host given))
-#### `$conf_d`
-The place where the configs will be dropped 
-(Default: /etc/rsnapshot (will be created if it doesn't exist))
-#### `$backup_user`
-The user to run the backup scripts as 
-(Default: root, also the user used for ssh connections, if you change this make sure you have proper key deployed and the user exists in the nodes to be backed up.)
-#### `$package_name`
-(Default: rsnapshot)
-#### `$package_ensure`
-(Default: present)
-#### `$cron_dir`
-Directory to drop the cron files to. Crons will be created per host. 
-(Default: /etc/cron.d)
-#### `$backup_levels`
-Array containing the backup levels (hourly, daily, weekly, monthly)
-Configure the backup_levels (valid per host and global, so you may either set: rsnapshot::backup_levels for all hosts or override default backup_levels for specific hosts)
-(Default: [ 'daily', 'weekly', ] )
 #### `$backup_defaults`
 Boolean. Backup default backup dirs or not.
 (Default: true)
 
-#### `$default_backup`
-The default backup directories. This will apply to all hosts unless you set [backup_defaults](#backup_defaults) = false
-Default is:
-
-```puppet
-  $default_backup         = {
-    '/etc'  => './',
-    '/home' => './',
-  }
-```
-
+#### `$backup_levels`
+Array containing the backup levels (hourly, daily, weekly, monthly)
+Configure the backup_levels (valid per host and global, so you may either set: rsnapshot::backup_levels for all hosts or override default backup_levels for specific hosts)
+(Default: [ 'daily', 'weekly', ] )
+#### `$backup_user`
+The user to run the backup scripts as 
+(Default: root, also the user used for ssh connections, if you change this make sure you have proper key deployed and the user exists in the nodes to be backed up.)
+#### `$conf_d`
+The place where the configs will be dropped 
+(Default: /etc/rsnapshot (will be created if it doesn't exist))
 #### `$cron`
 Hash. Set time ranges for different backup levels. Each item (minute, hour...) allows for cron notation, an array to pick a random time from and a range to pick a random time from.
 The range notation is '$start..$end', so to pick a random hour from 8 pm to 2 am, you could set the hour of your desired backup level to 
@@ -354,6 +333,44 @@ Default is:
   }
 ```
 
+#### `$cron_dir`
+Directory to drop the cron files to. Crons will be created per host. 
+(Default: /etc/cron.d)
+#### `$default_backup`
+The default backup directories. This will apply to all hosts unless you set [backup_defaults](#backup_defaults) = false
+Default is:
+
+```puppet
+  $default_backup         = {
+    '/etc'  => './',
+    '/home' => './',
+  }
+```
+#### `$cronfile_prefix_use`
+Bool. Set this to true if you want your cronfiles to have a prefix.
+(Default: false)
+#### `$cronfile_prefix`
+Optional prefix to add to the cronfiles name. Your files will be named: prefix_hostname
+(Default: 'rsnapshot_' only if you set $cronfile_prefix_use = true)
+#### `$hosts`
+Hash containing the hosts to be backed up and optional overrides per host
+(Default: undef (do nothing when no host given))
+#### `$interval`
+How many backups of each level to keep.
+Default is:
+
+```puppet
+  $interval               = {
+    'daily'   => '7',
+    'weekly'  => '4',
+    'monthly' => '6',
+  }
+```
+
+#### `$package_ensure`
+(Default: present)
+#### `$package_name`
+(Default: rsnapshot)
 #### `$snapshot_root`
 global. the directory holding your backups.
 (Default: /backup)
@@ -375,18 +392,6 @@ You will end up with a structure like:
     ├── daily.1
     ├── daily.2
     └── weekly.0
-```
-
-#### `$interval`
-How many backups of each level to keep.
-Default is:
-
-```puppet
-  $interval               = {
-    'daily'   => '7',
-    'weekly'  => '4',
-    'monthly' => '6',
-  }
 ```
 
 #### `$backup_scripts`
