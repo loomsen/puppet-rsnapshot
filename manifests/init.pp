@@ -20,6 +20,7 @@ class rsnapshot (
   $backup_levels           = $rsnapshot::params::config_backup_levels,
   $backup_user             = $rsnapshot::params::config_backup_user,
   $cron_service_name       = $rsnapshot::params::cron_service_name,
+  $manage_cron             = $rsnapshot::params::manage_cron,
   $cronfile_prefix         = $rsnapshot::params::config_cronfile_prefix,
   $cronfile_prefix_use     = $rsnapshot::params::config_cronfile_prefix_use,
   $check_mk_job            = $rsnapshot::params::config_check_mk_job,
