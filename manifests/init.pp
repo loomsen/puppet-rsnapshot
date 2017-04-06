@@ -18,6 +18,7 @@ class rsnapshot (
   $exclude                 = $rsnapshot::params::config_exclude,
   $snapshot_root           = $rsnapshot::params::config_snapshot_root,
   $backup_levels           = $rsnapshot::params::config_backup_levels,
+  $backup_user             = $rsnapshot::params::config_backup_user,
   $cron_service_name       = $rsnapshot::params::cron_service_name,
   $cronfile_prefix         = $rsnapshot::params::config_cronfile_prefix,
   $cronfile_prefix_use     = $rsnapshot::params::config_cronfile_prefix_use,
