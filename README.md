@@ -42,6 +42,7 @@ This module is best used with an ENC like hiera. It will make your config much e
 * This module will install the rsnapshot package on your system
 * This module will manage the rsnapshot config on your system
 * This module will manage cron entries for your configured nodes
+* This module will manage the cron service on your system
 
 ### Setup Requirements
 
@@ -150,11 +151,13 @@ rsnapshot::hosts:
 The defaults are pretty reasonable, I hope. However, you may override pretty much anything. Available parameters are discussed below. 
 
 #### Specials
-As mentioned, this module will generate random time entries for your hosts. The random number generator is hashed with hostname and backup_level, so the randomness will be repeatable per host.level. This is important so puppet won't override the crons with each run.
+This module will generate random time entries for your hosts. The random number generator is hashed with hostname and backup_level, so the randomness will be repeatable per host.level. This is important so puppet won't override the crons with each run.
 You may specify time ranges as follows:
   * default cron syntax
-  * an array with allowed values, for example, if you want the backup for a host to run between 1am and 5am, you would override the hours setting for the host in question.
-in hiera this would look like: (Explanation see below)
+  * an array with allowed values
+    - for example, if you want the backup for a host to run between 1am and 5am, you would override the hours setting for the host in question.
+
+In hiera this would look like: (Explanation see below)
 
 ```yaml
 rsnapshot::hosts:
@@ -336,6 +339,15 @@ Default is:
 #### `$cron_dir`
 Directory to drop the cron files to. Crons will be created per host. 
 (Default: /etc/cron.d)
+
+#### `$cronfile_prefix_use`
+Bool. Set this to true if you want your cronfiles to have a prefix.
+(Default: false)
+
+#### `$cronfile_prefix`
+Optional prefix to add to the cronfiles name. Your files will be named: prefix_hostname
+(Default: 'rsnapshot_' only if you set $cronfile_prefix_use = true)
+
 #### `$default_backup`
 The default backup directories. This will apply to all hosts unless you set [backup_defaults](#backup_defaults) = false
 Default is:
@@ -346,15 +358,11 @@ Default is:
     '/home' => './',
   }
 ```
-#### `$cronfile_prefix_use`
-Bool. Set this to true if you want your cronfiles to have a prefix.
-(Default: false)
-#### `$cronfile_prefix`
-Optional prefix to add to the cronfiles name. Your files will be named: prefix_hostname
-(Default: 'rsnapshot_' only if you set $cronfile_prefix_use = true)
+
 #### `$hosts`
 Hash containing the hosts to be backed up and optional overrides per host
 (Default: undef (do nothing when no host given))
+
 #### `$interval`
 How many backups of each level to keep.
 Default is:
@@ -369,8 +377,10 @@ Default is:
 
 #### `$package_ensure`
 (Default: present)
+
 #### `$package_name`
 (Default: rsnapshot)
+
 #### `$snapshot_root`
 global. the directory holding your backups.
 (Default: /backup)
@@ -637,8 +647,24 @@ Default is:  undef
 #### `$cmd_postexec`
 Default is:  undef
 
-#### `$use_lvm`
+#### `$du_args`
 Default is:  undef
+
+#### `$exclude`
+Default is:  []
+
+#### `$exclude_file`
+Other than this might suggest, the default behavior is to create an exclude file per host.
+Default is:  undef
+
+#### `$include`
+Default is:  []
+
+#### `$include_file`
+Default is:  undef
+
+#### `$link_dest`
+Default is:  false
 
 #### `$linux_lvm_cmd_lvcreate`
 Default is:  undef # '/sbin/lvcreate'
@@ -665,6 +691,9 @@ Default is:  undef
 #### `$linux_lvm_mountpath`
 Default is:  undef
 
+#### `$lockpath`
+Default is:  '/var/run/rsnapshot'
+
 #### `$logpath`
 Default is:  '/var/log/rsnapshot'
 
@@ -672,38 +701,15 @@ Default is:  '/var/log/rsnapshot'
 unused, we are logging to $logpath/$host.log
 Default is:  '/var/log/rsnapshot.log'
 
-#### `$lockpath`
-Default is:  '/var/run/rsnapshot'
-
-#### `$snapshot_root`
-Default is:  '/backup/'
-
-#### `$no_create_root`
-Boolean: true or false
-Default is:  undef
-
-#### `$verbose`
-Default is:  '2'
-
 #### `$loglevel`
 Default is:  '4'
 
-#### `$stop_on_stale_lockfile`
+#### `$manage_cron`
+Should this module manage the cron service?
+Default is: true
 
+#### `$no_create_root`
 Boolean: true or false
-Default is:  undef
-
-#### `$rsync_short_args`
-Default is:  '-az'
-
-#### `$rsync_long_args`
-rsync defaults are: --delete --numeric-ids --relative --delete-excluded 
-Default is:  undef
-
-#### `$ssh_args`
-Default is:  undef
-
-#### `$du_args`
 Default is:  undef
 
 #### `$one_fs`
@@ -712,32 +718,37 @@ Default is:  undef
 #### `$retain`
 Default is:  { }
 
-#### `$include`
-Default is:  []
+#### `$rsync_short_args`
+Default is:  '-az'
 
-#### `$exclude`
-Default is:  []
-
-#### `$include_file`
-
+#### `$rsync_long_args`
+rsync defaults are: --delete --numeric-ids --relative --delete-excluded 
 Default is:  undef
 
-#### `$exclude_file`
-Other than this might suggest, the default behavior is to create an exclude file per host.
+#### `$rsync_numtries`
+Default is:  1
+
+#### `$snapshot_root`
+Default is:  '/backup/'
+
+#### `$ssh_args`
 Default is:  undef
 
-#### `$link_dest`
-Default is:  false
+#### `$stop_on_stale_lockfile`
+Boolean: true or false
+Default is:  undef
 
 #### `$sync_first`
 Default is:  false
 
-#### `$rsync_numtries`
-
-Default is:  1
+#### `$use_lvm`
+Default is:  undef
 
 #### `$use_lazy_deletes`
 Default is:  false
+
+#### `$verbose`
+Default is:  '2'
 
 ## Limitations
 Currently, this module support CentOS, Fedora, Ubuntu and Debian.
@@ -750,5 +761,5 @@ want it off the face of the planet, feel free to get in touch with me.
 Norbert Varzariu (loomsen)
 
 ## Contributors
-Please see the [list of contributors.](https://github.com/loomsen/puppet-bloonix_agent/graphs/contributors)
+Please see the [list of contributors.](https://github.com/loomsen/puppet-rsnapshot/graphs/contributors)
 A big thank you to Hendrik Horeis <hendrik.horeis@gmail.com> for all his input and testing of this module.
