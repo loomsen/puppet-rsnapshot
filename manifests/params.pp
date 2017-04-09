@@ -12,6 +12,7 @@ class rsnapshot::params {
     'Debian' => 'cron',
     default  => '',
     }
+  $manage_cron                   = true
   $cron_dir                      = '/etc/cron.d'
   $config_backup_levels          = [ 'daily', 'weekly', 'monthly' ]
   $config_backup_defaults        = true
