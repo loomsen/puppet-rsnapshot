@@ -12,8 +12,8 @@ class rsnapshot::config (
   $conf_d                 = pick($rsnapshot::conf_d, $rsnapshot::params::conf_d, '/etc/rsnapshot')
   $snapshot_root          = pick($hosts['snapshot_root'], $rsnapshot::snapshot_root, '/backup')
   $logpath                = pick($rsnapshot::logpath, $rsnapshot::params::config_logpath)
-  $cronfile_prefix_use    = pick($rsnapshot::cronfile_prefix_use, $rsnapshot::params::cronfile_prefix_use, false)
-  $cronfile_prefix        = pick($rsnapshot::cronfile_prefix, $rsnapshot::params::cronfile_prefix, '')
+  $cronfile_prefix_use    = pick($rsnapshot::cronfile_prefix_use, $rsnapshot::params::config_cronfile_prefix_use, false)
+  $cronfile_prefix        = pick($rsnapshot::cronfile_prefix, $rsnapshot::params::config_cronfile_prefix, '')
   # make sure lock path and conf path exist
   file { $conf_d:
     ensure => 'directory',
@@ -82,7 +82,7 @@ class rsnapshot::config (
     $rsync_numtries         = pick_undef($hash['rsync_numtries'], $rsnapshot::params::config_rsync_numtries)
     #$backup_scripts         = pick_undef($hash['backup_scripts'], $rsnapshot::params::config_backup_scripts)
 
-    $snapshot_dir           = "${config_snapshot_root}/${host}"
+    $snapshot_dir           = "${snapshot_root}/${host}"
     $config                 = "${conf_d}/${host}.rsnapshot.conf"
     $lockfile               = "${lockpath}/${host}.pid"
     $logfile                = "${logpath}/${host}.log"
