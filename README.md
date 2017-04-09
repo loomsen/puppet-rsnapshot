@@ -761,5 +761,5 @@ want it off the face of the planet, feel free to get in touch with me.
 Norbert Varzariu (loomsen)
 
 ## Contributors
-Please see the [list of contributors.](https://github.com/loomsen/puppet-bloonix_agent/graphs/contributors)
+Please see the [list of contributors.](https://github.com/loomsen/puppet-rsnapshot/graphs/contributors)
 A big thank you to Hendrik Horeis <hendrik.horeis@gmail.com> for all his input and testing of this module.
