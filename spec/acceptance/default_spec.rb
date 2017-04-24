@@ -41,7 +41,7 @@ describe 'rsnapshot' do
     end
     describe file('/etc/rsnapshot/example.com.rsnapshot.conf') do
       it { is_expected.to exist }
-      its(:content) { is_expected.to match 'backup' }
+      its(:content) { is_expected.to match 'backup\t/var/\t./' }
     end
     describe file('/etc/rsnapshot.conf') do
       it { is_expected.to exist }
@@ -55,10 +55,6 @@ describe 'rsnapshot' do
       describe file('/etc/cron.d/example_com') do
       it { is_expected.to exist }
       its(:content) { is_expected.to match 'example.com' }
-    end
-    describe cron do
-      its(:table) { should match  /.*\/etc\/rsnapshot\/localhost.rsnapshot.conf daily.*/ }
-      its(:table) { should match  /.*\/etc\/rsnapshot\/example\.com\.rsnapshot\.conf daily.*/ }
     end
   end
 end
