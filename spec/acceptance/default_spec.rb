@@ -41,7 +41,7 @@ describe 'rsnapshot' do
     end
     describe file('/etc/rsnapshot/example.com.rsnapshot.conf') do
       it { is_expected.to exist }
-      its(:content) { is_expected.to match 'backup\t/var/\t./' }
+      its(:content) { is_expected.to match 'backup\troot@example.com:/var/\t./' }
     end
     describe file('/etc/rsnapshot.conf') do
       it { is_expected.to exist }
