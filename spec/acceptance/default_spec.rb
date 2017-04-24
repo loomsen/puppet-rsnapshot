@@ -28,6 +28,9 @@ describe 'rsnapshot' do
     end
   end
   context 'files provisioned' do
+    describe file('/etc/tmpfiles.d') do
+      it { should be_directory }
+    end
     describe file('/etc/tmpfiles.d/rsnapshot.conf') do
       it { is_expected.to exist }
       its(:content) { is_expected.to match 'D /var/run/rsnapshot 0755 root root -' }
