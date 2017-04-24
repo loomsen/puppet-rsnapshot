@@ -28,13 +28,20 @@ describe 'rsnapshot' do
     end
   end
   context 'files provisioned' do
+    describe file('/etc/tmpfiles.d/rsnapshot.conf') do
+      it { is_expected.to exist }
+      its(:content) { is_expected.to match 'D /var/run/rsnapshot 0755 root root -' }
+    end
+    describe file('/var/run/rsnapshot') do
+      it { should be_directory }
+    end
     describe file('/etc/rsnapshot/localhost.rsnapshot.conf') do
       it { is_expected.to exist }
       its(:content) { is_expected.to match 'backup' }
     end
     describe file('/etc/rsnapshot/example.com.rsnapshot.conf') do
       it { is_expected.to exist }
-      its(:content) { is_expected.to match 'backup' }
+      its(:content) { is_expected.to match 'backup\troot@example.com:/var/\t./' }
     end
     describe file('/etc/rsnapshot.conf') do
       it { is_expected.to exist }
