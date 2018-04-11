@@ -96,7 +96,7 @@ class rsnapshot::params {
     monthly    => {
       minute   => '0..59',
       hour     => '0..23',      # you could also do:   ['21..23','0..4','5'],
-      monthday => '0..28',
+      monthday => '1..28',
       month    => '*',
       weekday  => '*',
     },
