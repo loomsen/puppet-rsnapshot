@@ -190,6 +190,8 @@ class rsnapshot::config (
     # create cron files for each backup level
     # merge possible cron definitions to one
     $real_cron = deep_merge($rsnapshot::params::cron, $rsnapshot::cron, $hash[cron])
+    $cmd_rsnapshot = pick($rsnapshot::cmd_rsnapshot, $rsnapshot::params::config_cmd_rsnapshot)
+
     concat::fragment { "mailto for ${host}":
       content => "#This file is managed by puppet\nMAILTO=${real_cron[mailto]}\n\n",
       target  => $cronfile,
@@ -197,12 +199,12 @@ class rsnapshot::config (
     }
 
     $backup_levels.each |String $level| {
-      $mailto   = $real_cron[mailto]
-      $minute   = rand_from_array($real_cron[$level][minute],   "${host}.${level}.minute")
-      $hour     = rand_from_array($real_cron[$level][hour],     "${host}.${level}.hour")
-      $monthday = rand_from_array($real_cron[$level][monthday], "${host}.${level}.monthday")
-      $month    = rand_from_array($real_cron[$level][month],    "${host}.${level}.month")
-      $weekday  = rand_from_array($real_cron[$level][weekday],  "${host}.${level}.weekday")
+      $mailto        = $real_cron[mailto]
+      $minute        = rand_from_array($real_cron[$level][minute],   "${host}.${level}.minute")
+      $hour          = rand_from_array($real_cron[$level][hour],     "${host}.${level}.hour")
+      $monthday      = rand_from_array($real_cron[$level][monthday], "${host}.${level}.monthday")
+      $month         = rand_from_array($real_cron[$level][month],    "${host}.${level}.month")
+      $weekday       = rand_from_array($real_cron[$level][weekday],  "${host}.${level}.weekday")
 
       concat::fragment { "${host}.${level}":
         target  => $cronfile,

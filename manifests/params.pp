@@ -3,14 +3,18 @@
 # default params
 class rsnapshot::params {
   $hosts                         = undef
-  $conf_d                        = '/etc/rsnapshot' # the place where the host specific configs are stored
+  $conf_d                        = $::osfamily ? {
+    'FreeBSD' => '/usr/local/etc/rsnapshot', # the place where the host specific configs are stored
+    default   => '/etc/rsnapshot,' # the place where the host specific configs are stored
+    }
   $config_backup_user            = 'root'
   $package_name                  = 'rsnapshot'
   $package_ensure                = 'present'
   $cron_service_name             = $::osfamily ? {
-    'RedHat' => 'crond',
-    'Debian' => 'cron',
-    default  => '',
+    'RedHat'  => 'crond',
+    'Debian'  => 'cron',
+    'FreeBSD' => 'cron',
+    default   => '',
     }
   $manage_cron                   = true
   $cron_dir                      = '/etc/cron.d'
@@ -20,11 +24,21 @@ class rsnapshot::params {
   $config_check_mk_job           = false
   $config_cmd_cp                 = '/bin/cp'
   $config_cmd_rm                 = '/bin/rm'
-  $config_cmd_rsync              = '/usr/bin/rsync'
+  $config_cmd_rsync              = $::osfamily ? {
+    'FreeBSD' => '/usr/local/bin/rsync',
+    default   => '/usr/bin/rsync',
+    }
   $config_cmd_ssh                = '/usr/bin/ssh'
   $config_cmd_logger             = '/usr/bin/logger'
   $config_cmd_du                 = '/usr/bin/du'
-  $config_cmd_rsnapshot_diff     = '/usr/bin/rsnapshot-diff'
+  $config_cmd_rsnapshot          = $::osfamily ? {
+    'FreeBSD' => '/usr/local/bin/rsnapshot',
+    default   => '/usr/bin/rsnapshot',
+    }
+  $config_cmd_rsnapshot_diff     = $::osfamily ? {
+    'FreeBSD' => '/usr/local/bin/rsnapshot-diff',
+    default   => '/usr/bin/rsnapshot-diff',
+    }
   $config_cmd_preexec            = undef
   $config_cmd_postexec           = undef
   $config_cronfile_prefix        = 'rsnapshot_'
