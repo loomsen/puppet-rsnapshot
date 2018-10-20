@@ -5,17 +5,16 @@ cache: bundler
 matrix:
   fast_finish: true
   include:
-  - rvm: 2.1
+  - rvm: 2.2
     env: PUPPET_GEM_VERSION="~> 4.0"
     script: "bundle exec rake validate"
-  - rvm: 2.1
+  - rvm: 2.2
     env: PUPPET_GEM_VERSION="~> 4.0"
     script: "bundle exec rake spec SPEC_OPTS='--format documentation'"
-  - rvm: 2.1
+  - rvm: 2.2
     env: PUPPET_GEM_VERSION="~> 4.0"
     script: "bundle exec rake beaker"
     services: docker
     sudo: required
 notifications:
   email: false
-
