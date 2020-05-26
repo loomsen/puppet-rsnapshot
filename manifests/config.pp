@@ -103,6 +103,7 @@ class rsnapshot::config (
     if ! ( $interval and $retain ) {
       $interval             = pick($hash['interval'], $rsnapshot::params::config_interval)
     }
+
     # rsnapshot wants numeric values
     if $link_dest {
       $link_dest_num        = bool2num($link_dest)
@@ -112,6 +113,9 @@ class rsnapshot::config (
     }
     if $use_lazy_deletes {
       $use_lazy_deletes_num = bool2num($use_lazy_deletes)
+    }
+    if $one_fs {
+      $one_fs_num           = bool2num($one_fs)
     }
 
     $real_include = $rsnapshot::include + $include
