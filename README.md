@@ -1,3 +1,7 @@
+# Abandoned
+
+NOTE: This project is abandoned. If you want to take ownership, please reach out to me and we can make it happen.
+
 [![Build Status](https://travis-ci.org/loomsen/puppet-rsnapshot.svg?branch=master)](https://travis-ci.org/loomsen/puppet-rsnapshot)
 
 # rsnapshot
